@@ -1,9 +1,9 @@
 const isAuthenticated = () => {
   const token = localStorage.getItem('token');
   if (token !== null) {
-    return false;
+    return true;
   }
-  return true;
+  return false;
 };
 
 // let logoutUser = () => {

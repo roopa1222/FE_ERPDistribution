@@ -4,10 +4,11 @@ import { useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import ListItem from '@mui/material/ListItem';
-import { useTheme } from '@mui/material/styles';
+import { useTheme,alpha } from '@mui/material/styles';
 import ListItemButton from '@mui/material/ListItemButton';
 import Drawer, { drawerClasses } from '@mui/material/Drawer';
-
+import Avatar from '@mui/material/Avatar';
+import Typography from '@mui/material/Typography';
 import { usePathname } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
 
@@ -15,10 +16,37 @@ import { varAlpha } from 'src/theme/styles';
 
 import { Logo } from 'src/components/logo';
 import { Scrollbar } from 'src/components/scrollbar';
+import { _myAccount } from 'src/_mock/_data';
 
 import type { WorkspacesPopoverProps } from '../components/workspaces-popover';
 
 // ----------------------------------------------------------------------
+
+
+const renderAccount = (
+  <Box
+    sx={{
+      my: 3,
+      mx: 2.5,
+      py: 2,
+      px: 2.5,
+      display: 'flex',
+      borderRadius: 1.5,
+      alignItems: 'center',
+      bgcolor: (theme) => alpha(theme.palette.grey[500], 0.12),
+    }}
+  >
+    <Avatar src={_myAccount.photoURL} alt="photoURL" />
+
+    <Box sx={{ ml: 2 }}>
+      <Typography variant="subtitle2">{_myAccount.displayName}</Typography>
+
+      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+        {_myAccount.role}
+      </Typography>
+    </Box>
+  </Box>
+);
 
 export type NavContentProps = {
   data: {
@@ -147,6 +175,9 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
   ); */}
 
       <Scrollbar fillContent>
+
+      {renderAccount}
+
         <Box component="nav" display="flex" flex="1 1 auto" flexDirection="column" sx={{ marginTop: '10px', ...sx }}>
           <Box component="ul" gap={0.5} display="flex" flexDirection="column">
             {data.map((item) => {

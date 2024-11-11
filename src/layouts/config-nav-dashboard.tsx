@@ -7,8 +7,9 @@ const icon = (name: string) => (
   <SvgColor width="100%" height="100%" src={`/assets/icons/navbar/${name}.svg`} />
 );
 
-export const navData = [
-  {
+// Role-based route access
+  const role = localStorage.getItem('role'); // Retrieve role from localStorage
+  const routes = [{
     title: 'Dashboard',
     path: '/',
     icon: icon('ic-analytics'),
@@ -17,30 +18,20 @@ export const navData = [
     title: 'User',
     path: '/user',
     icon: icon('ic-user'),
-  },
-  {
-    title: 'Product',
-    path: '/products',
-    icon: icon('ic-cart'),
-    info: (
-      <Label color="error" variant="inverted">
-        +3
-      </Label>
-    ),
-  },
-  {
-    title: 'Branch',
-    path: '/branch',
-    icon:  icon('faCodeBranch'),
-  },
-  {
-    title: 'Sign in',
-    path: '/sign-in',
-    icon: icon('ic-lock'),
-  },
-  {
-    title: 'Not found',
-    path: '/404',
-    icon: icon('ic-disabled'),
-  },
-];
+  }];
+  
+  if(role === 'SALESMAN'){
+routes.push(  {
+  title: 'Branch',
+  path: '/branch',
+  icon:  icon('faCodeBranch'),
+},)
+  }
+  if(role === 'ADMIN'){
+  routes.push();
+  }
+  if(role === 'SUPER_ADMIN'){
+    routes.push();
+  }
+
+export const navData = routes;
