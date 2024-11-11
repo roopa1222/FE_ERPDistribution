@@ -15,9 +15,6 @@ export const getApi = async (url: string) => {
   
 export const postApi = async (url: string, data: any) => {
     try {
-        console.log('url',url);
-        console.log('data',data);
-        
       const response = await userApi.post(`${ConfigData.SERVER_URL}${url}`, data);
       return response.data;
     } catch (error) {

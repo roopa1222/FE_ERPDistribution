@@ -1,3 +1,4 @@
+import { decodeJwtToken } from 'src/utils/utilService';
 import {
   _id,
   _price,
@@ -11,13 +12,29 @@ import {
   _productNames,
 } from './_mock';
 
-// ----------------------------------------------------------------------
+const token = localStorage.getItem('token') || '';
+const userRole = localStorage.getItem('role') || '';
+
+let userName = '';
+let email = '';
+
+if (token) {
+  const data = decodeJwtToken(token);
+  userName = `${data?.firstName || ''} ${data?.lastName || ''}`
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+    .trim();
+  email = data?.email || '';
+}
 
 export const _myAccount = {
-  displayName: 'Jaydon Frankie',
-  email: 'demo@minimals.cc',
+  displayName: userName,
+  email,
   photoURL: '/assets/images/avatar/avatar-25.webp',
+  role: userRole,
 };
+
 
 // ----------------------------------------------------------------------
 

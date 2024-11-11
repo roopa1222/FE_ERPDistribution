@@ -1,5 +1,4 @@
-import { useState, useCallback } from 'react';
-
+import { useState, useCallback, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Divider from '@mui/material/Divider';
@@ -15,7 +14,9 @@ import {postApi } from 'src/service/api';
 
 import { Iconify } from 'src/components/iconify';
 // ----------------------------------------------------------------------
-
+import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar';
+import Alert,{ AlertColor } from '@mui/material/Alert';
+import { decodeJwtToken } from 'src/utils/utilService';
 
 interface LoginData {
   email: string;
@@ -30,6 +31,13 @@ export function SignInView() {
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState<string>('');
   const [passwordError, setPasswordError] = useState<string>('');
+  const [open, setOpen] = useState(false);
+  const [severityLevel, setSeverityLevel] = useState<AlertColor>('success');
+  const [message, setMessage] = useState<string>('');
+
+  useEffect(()=>{
+    localStorage.clear();
+  },[])
 
   const validateEmail = (emailInput: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -66,33 +74,38 @@ export function SignInView() {
     if (!valid) return;
 
     // Proceed with sign-in logic
-    console.log('Email:', email);
-    console.log('Password:', password);
     const data : LoginData = {
       email,
       password
     } 
     try {
       const response = await postApi('/v1/auth/login', data);
-      console.log('Response:', response);
-  
-      if (response.status !== 200) {
-        // Handle the error case when the status is not 200
-        console.error('Login failed, status:', response.status);
-        // You can show an error message here to the user if needed
-        // For example:
-        // setLoginError('Invalid credentials or server error');
-      } else {
-        // Handle successful login
-        router.push('/');
+      if(response.status === 200 ) {
+        const token = response.data.token;
+        localStorage.setItem('token',token);
+        
+        const decodedToken = decodeJwtToken(token);
+        localStorage.setItem('role',decodedToken.role);
+        
+      setSeverityLevel('success');
+      setMessage('Logged in successfully');
+
+        handleClick();
+        window.location.href = 'http://localhost:3039/';
+
+      }else{
+      setSeverityLevel('error');
+      setMessage(response.message);
+      handleClick();
       }
     } catch (error) {
+      setSeverityLevel('error');
+      setMessage('Internal server error')
+      handleClick();
       console.error('Login request failed:', error);
-      // setLoginError('An error occurred. Please try again.');
     }
     
-    router.push('/');
-  }, [email, password, router]);
+  }, [email, password]);
 
   const renderForm = (
     <Box display="flex" flexDirection="column" alignItems="flex-end">
@@ -153,6 +166,21 @@ export function SignInView() {
     </Box>
   );
 
+  const handleClick = () => {
+    setOpen(true);
+  };
+
+  const handleClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: SnackbarCloseReason,
+  ) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpen(false);
+  };
+
   return (
     <>
       <Box gap={1.5} display="flex" flexDirection="column" alignItems="center" sx={{ mb: 5 }}>
@@ -187,6 +215,19 @@ export function SignInView() {
           <Iconify icon="ri:twitter-x-fill" />
         </IconButton>
       </Box>
+          <Snackbar open={open} autoHideDuration={3000} onClose={handleClose} 
+          anchorOrigin={{ vertical:'top', horizontal:'right' }}
+          >
+        <Alert
+          onClose={handleClose}
+          severity={severityLevel}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
+
     </>
   );
 }
