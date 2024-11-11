@@ -116,7 +116,7 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
 
   return (
     <>
-      <Logo />
+      <Logo sx={{ marginLeft: '40px',width: '80px', height: '60px' }}/>
 
       {slots?.topArea}
 
@@ -147,7 +147,7 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
   ); */}
 
       <Scrollbar fillContent>
-        <Box component="nav" display="flex" flex="1 1 auto" flexDirection="column" sx={sx}>
+        <Box component="nav" display="flex" flex="1 1 auto" flexDirection="column" sx={{ marginTop: '10px', ...sx }}>
           <Box component="ul" gap={0.5} display="flex" flexDirection="column">
             {data.map((item) => {
               const isActived = item.path === pathname;

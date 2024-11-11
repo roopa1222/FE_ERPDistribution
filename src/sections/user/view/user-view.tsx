@@ -15,6 +15,7 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 
+import {AddSalesMan} from './addSalesMan';
 import { TableNoData } from '../table-no-data';
 import { UserTableRow } from '../user-table-row';
 import { UserTableHead } from '../user-table-head';
@@ -25,11 +26,18 @@ import { emptyRows, applyFilter, getComparator } from '../utils';
 import type { UserProps } from '../user-table-row';
 
 // ----------------------------------------------------------------------
-
 export function UserView() {
   const table = useTable();
 
   const [filterName, setFilterName] = useState('');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [dashboardContent, setdashboardContent] = useState(true)
+
+  const handleClose = () => {
+    setdashboardContent(true);
+    setIsFormOpen(false);
+};
+
 
   const dataFiltered: UserProps[] = applyFilter({
     inputData: _users,
@@ -39,8 +47,16 @@ export function UserView() {
 
   const notFound = !dataFiltered.length && !!filterName;
 
+  const handleButtonClick = () => {
+    console.log('is form open')
+    setIsFormOpen(!isFormOpen);
+    setdashboardContent(!dashboardContent)
+  };
+
   return (
-    <DashboardContent>
+    <>
+       { dashboardContent && (
+      <DashboardContent>
       <Box display="flex" alignItems="center" mb={5}>
         <Typography variant="h4" flexGrow={1}>
           Users
@@ -49,11 +65,11 @@ export function UserView() {
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
+          onClick={handleButtonClick}
         >
           New user
         </Button>
       </Box>
-
       <Card>
         <UserTableToolbar
           numSelected={table.selected.length}
@@ -80,7 +96,7 @@ export function UserView() {
                   )
                 }
                 headLabel={[
-                  { id: 'name', label: 'Name' },
+                  { id: 'name', label: 'name' },
                   { id: 'company', label: 'Company' },
                   { id: 'role', label: 'Role' },
                   { id: 'isVerified', label: 'Verified', align: 'center' },
@@ -125,6 +141,9 @@ export function UserView() {
         />
       </Card>
     </DashboardContent>
+    )}
+    {isFormOpen && <AddSalesMan handleClose={handleClose} />}
+    </>  
   );
 }
 

@@ -100,9 +100,9 @@ export const _products = [...Array(24)].map((_, index) => {
 
 export const _langs = [
   {
-    value: 'en',
-    label: 'English',
-    icon: '/assets/icons/flags/ic-flag-en.svg',
+    value: 'hi', 
+    label: 'Hindi',
+    icon: '/assets/icons/flags/ic-flag-in.svg', 
   },
   {
     value: 'de',
@@ -114,6 +114,7 @@ export const _langs = [
     label: 'French',
     icon: '/assets/icons/flags/ic-flag-fr.svg',
   },
+  
 ];
 
 // ----------------------------------------------------------------------

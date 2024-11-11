@@ -13,7 +13,7 @@ import { isAuthenticated } from 'src/service/authService';
 
 // Lazy-loaded pages
 const HomePage = lazy(() => import('src/pages/home'));
-const BlogPage = lazy(() => import('src/pages/blog'));
+const BranchPage = lazy(() => import('src/pages/branch'));
 const UserPage = lazy(() => import('src/pages/user'));
 const SignInPage = lazy(() => import('src/pages/sign-in'));
 const ProductsPage = lazy(() => import('src/pages/products'));
@@ -59,7 +59,7 @@ export function Router() {
         { element: <HomePage />, index: true },
         { path: 'user', element: <UserPage /> },
         { path: 'products', element: <ProductsPage /> },
-        { path: 'blog', element: <BlogPage /> },
+        { path: 'branch', element: <BranchPage /> },
       ],
     },
     {
