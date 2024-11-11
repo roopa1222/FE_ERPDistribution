@@ -29,9 +29,9 @@ export const navData = [
     ),
   },
   {
-    title: 'Blog',
-    path: '/blog',
-    icon: icon('ic-blog'),
+    title: 'Branch',
+    path: '/branch',
+    icon:  icon('faCodeBranch'),
   },
   {
     title: 'Sign in',

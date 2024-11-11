@@ -1,5 +1,8 @@
 import 'src/global.css';
 
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { SnackbarProvider } from 'notistack';
+
 import Fab from '@mui/material/Fab';
 
 import { Router } from 'src/routes/sections';
@@ -9,6 +12,8 @@ import { useScrollToTop } from 'src/hooks/use-scroll-to-top';
 import { ThemeProvider } from 'src/theme/theme-provider';
 
 import { Iconify } from 'src/components/iconify';
+
+import { ToastProvider } from './components/toaster/toastProvider';
 
 // ----------------------------------------------------------------------
 
@@ -37,7 +42,15 @@ export default function App() {
 
   return (
     <ThemeProvider>
+      <SnackbarProvider maxSnack={3} 
+            anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right', 
+            }}>
+      <ToastProvider>
       <Router />
+      </ToastProvider>
+      </SnackbarProvider>
       {githubButton}
     </ThemeProvider>
   );

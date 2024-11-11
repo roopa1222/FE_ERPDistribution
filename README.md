@@ -11,7 +11,7 @@
 - [Dashboard](https://free.minimals.cc/)
 - [Users](https://free.minimals.cc/user)
 - [Products](https://free.minimals.cc/products)
-- [Blog](https://free.minimals.cc/blog)
+- [Branch](https://free.minimals.cc/branch)
 - [Sign in](https://free.minimals.cc/sign-in)
 - [Not found](https://free.minimals.cc/404)
 

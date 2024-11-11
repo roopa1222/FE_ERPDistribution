@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Divider from '@mui/material/Divider';
@@ -9,8 +10,10 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import { useRouter } from 'src/routes/hooks';
+
+import {postApi } from 'src/service/api';
+
 import { Iconify } from 'src/components/iconify';
-import { getApi,postApi } from 'src/service/api';
 // ----------------------------------------------------------------------
 
 
@@ -38,7 +41,7 @@ export function SignInView() {
       setPasswordError('Please enter a password');
       return false;
     }
-    if (passwordInput.length < 8) {
+    if (passwordInput.length <6) {
       setPasswordError('Password must be at least 8 characters');
       return false;
     }
@@ -70,7 +73,7 @@ export function SignInView() {
       password
     } 
     try {
-      const response = await postApi('/auth/login', data);
+      const response = await postApi('/v1/auth/login', data);
       console.log('Response:', response);
   
       if (response.status !== 200) {
