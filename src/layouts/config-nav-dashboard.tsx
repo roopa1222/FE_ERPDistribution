@@ -1,4 +1,3 @@
-import { Label } from 'src/components/label';
 import { SvgColor } from 'src/components/svg-color';
 
 // ----------------------------------------------------------------------
@@ -20,7 +19,7 @@ const icon = (name: string) => (
     icon: icon('ic-user'),
   }];
   
-  if(role === 'SALESMAN'){
+  if(role === 'SALESMAN' || role === 'SUPER_ADMIN'){
 routes.push(  {
   title: 'Branch',
   path: '/branch',

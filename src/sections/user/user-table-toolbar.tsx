@@ -19,7 +19,7 @@ export function UserTableToolbar({ numSelected, filterName, onFilterName }: User
   return (
     <Toolbar
       sx={{
-        height: 96,
+        height: 80,
         display: 'flex',
         justifyContent: 'space-between',
         p: (theme) => theme.spacing(0, 1, 0, 3),
@@ -44,7 +44,7 @@ export function UserTableToolbar({ numSelected, filterName, onFilterName }: User
               <Iconify width={20} icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
             </InputAdornment>
           }
-          sx={{ maxWidth: 320 }}
+          sx={{ maxWidth: 320, height: 36,  }}
         />
       )}
 

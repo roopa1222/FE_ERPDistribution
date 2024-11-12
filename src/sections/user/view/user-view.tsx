@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -8,30 +8,37 @@ import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
+import { TableRow, TableCell, TableHead } from '@mui/material';
 
-import { _users } from 'src/_mock';
+import { getApi } from 'src/service/api';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 
 import {AddSalesMan} from './addSalesMan';
-import { TableNoData } from '../table-no-data';
-import { UserTableRow } from '../user-table-row';
-import { UserTableHead } from '../user-table-head';
-import { TableEmptyRows } from '../table-empty-rows';
+import { applyFilter, getComparator } from '../utils';
 import { UserTableToolbar } from '../user-table-toolbar';
-import { emptyRows, applyFilter, getComparator } from '../utils';
 
-import type { UserProps } from '../user-table-row';
 
 // ----------------------------------------------------------------------
 export function UserView() {
   const table = useTable();
-
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [filterName, setFilterName] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [dashboardContent, setdashboardContent] = useState(true)
+  const [data, setData] = useState<any[]>([]);
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Reset page to 0 on rowsPerPage change
+  };
 
   const handleClose = () => {
     setdashboardContent(true);
@@ -39,11 +46,11 @@ export function UserView() {
 };
 
 
-  const dataFiltered: UserProps[] = applyFilter({
-    inputData: _users,
-    comparator: getComparator(table.order, table.orderBy),
-    filterName,
-  });
+const dataFiltered: any[] = applyFilter({
+  inputData: data,
+  comparator: getComparator(table.order, table.orderBy),
+  filterName,
+});
 
   const notFound = !dataFiltered.length && !!filterName;
 
@@ -51,6 +58,20 @@ export function UserView() {
     console.log('is form open')
     setIsFormOpen(!isFormOpen);
     setdashboardContent(!dashboardContent)
+  };
+
+  useEffect(() => {
+    getAllUser();
+  }, []);
+
+
+  const getAllUser = async () => {
+    try {
+      const response = await getApi('/v1/auth/get-all-users');
+      setData(response.data.data);
+    } catch (error) {
+      console.error('Error fetching data:', error); // Handle any error
+    }
   };
 
   return (
@@ -83,61 +104,50 @@ export function UserView() {
         <Scrollbar>
           <TableContainer sx={{ overflow: 'unset' }}>
             <Table sx={{ minWidth: 800 }}>
-              <UserTableHead
-                order={table.order}
-                orderBy={table.orderBy}
-                rowCount={_users.length}
-                numSelected={table.selected.length}
-                onSort={table.onSort}
-                onSelectAllRows={(checked) =>
-                  table.onSelectAllRows(
-                    checked,
-                    _users.map((user) => user.id)
-                  )
-                }
-                headLabel={[
-                  { id: 'name', label: 'name' },
-                  { id: 'company', label: 'Company' },
-                  { id: 'role', label: 'Role' },
-                  { id: 'isVerified', label: 'Verified', align: 'center' },
-                  { id: 'status', label: 'Status' },
-                  { id: '' },
-                ]}
-              />
+            <TableHead>
+                <TableRow>
+                  {[
+                    { id: 'SrNo.', label: 'SrNo.' },
+                    { id: 'firstName', label: 'firstName' },
+                    { id: 'lastName', label: 'lastName' },
+                    { id: 'branchName', label: 'branchName' },
+                    { id: 'role', label: 'role' },
+                    { id: 'Status', label: 'Status' },
+                    // { id: 'Delete', label: 'Delete' },
+                  ].map((column) => (
+                    <TableCell key={column.id}>
+                      {column.label}
+                    </TableCell>
+
+                  ))}
+                </TableRow>
+              </TableHead>
               <TableBody>
                 {dataFiltered
-                  .slice(
-                    table.page * table.rowsPerPage,
-                    table.page * table.rowsPerPage + table.rowsPerPage
-                  )
-                  .map((row) => (
-                    <UserTableRow
-                      key={row.id}
-                      row={row}
-                      selected={table.selected.includes(row.id)}
-                      onSelectRow={() => table.onSelectRow(row.id)}
-                    />
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{row.firstName}</TableCell>
+                      <TableCell>{row.lastName }</TableCell>
+                      <TableCell>{}</TableCell>
+                      <TableCell>{row.role}</TableCell>
+                    </TableRow>
                   ))}
-
-                <TableEmptyRows
-                  height={68}
-                  emptyRows={emptyRows(table.page, table.rowsPerPage, _users.length)}
-                />
-
-                {notFound && <TableNoData searchQuery={filterName} />}
               </TableBody>
+              
             </Table>
           </TableContainer>
         </Scrollbar>
 
         <TablePagination
           component="div"
-          page={table.page}
-          count={_users.length}
-          rowsPerPage={table.rowsPerPage}
-          onPageChange={table.onChangePage}
+          count={data.length}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
           rowsPerPageOptions={[5, 10, 25]}
-          onRowsPerPageChange={table.onChangeRowsPerPage}
         />
       </Card>
     </DashboardContent>
