@@ -2,14 +2,17 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'react-phone-input-2/lib/style.css';
 
+import type { SelectChangeEvent } from '@mui/material';
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 import PhoneInput from 'react-phone-input-2';
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import CloseIcon from '@mui/icons-material/Close';
-import { Grid , Card, Button, TextField, Typography, IconButton, CardContent, FormControl, FormHelperText } from '@mui/material';
+import { Grid, Card, Button, Select, MenuItem, TextField, Typography, IconButton, InputLabel, CardContent, FormControl, FormHelperText } from '@mui/material';
 
+import { getApi } from 'src/service/branchApi';
 import { registerApi } from 'src/service/registerApi';
 
 import { ToastContext } from 'src/components/toaster/toastProvider';
@@ -23,6 +26,7 @@ interface AddSalesManProps {
 }
 export function AddSalesMan({ handleClose }: AddSalesManProps) {
     const { showToast } = useContext(ToastContext);
+    const [data, setData] = useState<any[]>([]);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -32,7 +36,7 @@ export function AddSalesMan({ handleClose }: AddSalesManProps) {
         userName: '',
         role: '',
         email: '',
-        password:'',
+        password: '',
     });
 
     const [errors, setErrors] = useState({
@@ -44,7 +48,7 @@ export function AddSalesMan({ handleClose }: AddSalesManProps) {
         userName: '',
         email: '',
         role: '',
-        password:'',
+        password: '',
     });
 
     // Email Validation Function
@@ -103,15 +107,26 @@ export function AddSalesMan({ handleClose }: AddSalesManProps) {
         }));
     };
 
+    useEffect(() => {
+        getAllBranch()
+    }, []);
+
+    const getAllBranch = async () => {
+        try {
+            const response = await getApi('/v1/branch/all-branches');
+            setData(response.data.data);
+        } catch (error) {
+            console.error('Error fetching data:', error); // Handle any error
+        }
+    };
 
     // Handle Select Change
-    // const handleSelectChange = (e: SelectChangeEvent<string>) => {
-    //     const { name, value } = e.target;
-    //     setFormData((prev) => ({
-    //         ...prev,
-    //         [name]: value,
-    //     }));
-    // };
+    const handleSelectChange = (event: SelectChangeEvent<string>) => {
+        setFormData({
+          ...formData,
+          branchId: event.target.value, // This should update the branchId in formData
+        });
+      };
 
     // Handle Input Blur (trigger validation when user clicks out of the field)
     const handleInputBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -125,7 +140,7 @@ export function AddSalesMan({ handleClose }: AddSalesManProps) {
             if (!value) error = `${name.replace(/([A-Z])/g, ' $1')} is required`;
         } else if (name === 'mobileNo') {
             if (!validateMobileNumber(value)) error = 'Enter a valid 10-digit mobile number';
-        } 
+        }
         // else if (name === 'dob') {
         //     const today = new Date();
         //     const dob = new Date(value);
@@ -162,161 +177,167 @@ export function AddSalesMan({ handleClose }: AddSalesManProps) {
     };
 
     // Handle Form Submission
-        const handleSubmit = async (e: React.FormEvent) => {
-            e.preventDefault();
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-            let formValid = true;
-            const newErrors = {
-                firstName: '',
-                lastName: '',
-                branchId: '',
-                mobileNo: '',
-                // address: '',
-                userName: '',
-                email: '',
-                role: '',
-                password:'',
-            };
-
-            // Validate all fields
-            Object.keys(formData).forEach((field) => {
-                const value = formData[field as keyof typeof formData];
-                if (!value) {
-                    newErrors[field as keyof typeof newErrors] = `${field} is required`;
-                    formValid = false;
-                }
-            });
-
-            // Check if form is valid
-            if (!formValid) {
-                setErrors(newErrors);
-                return;
-            }
-
-            // Reset errors if form is valid
-            setErrors({
-                firstName: '',
-                lastName: '',
-                branchId: '',
-                mobileNo: '',
-                // address: '',
-                userName: '',
-                email: '',
-                role: '',
-                password:'',
-            });
-            try {
-                const response = await registerApi('/v1/auth/add-user', formData); // Call registerApi with formData
-                if (response.status === 200) {
-                    showToast(response.data.message, 'success');
-                    handleClose();
-                } else {
-                    showToast(response.data.message || 'Registration failed', 'error');
-                }
-            } catch (error) {
-                showToast(error.message, 'error');
-            }
+        let formValid = true;
+        const newErrors = {
+            firstName: '',
+            lastName: '',
+            branchId: '',
+            mobileNo: '',
+            // address: '',
+            userName: '',
+            email: '',
+            role: '',
+            password: '',
         };
+
+        // Validate all fields
+        Object.keys(formData).forEach((field) => {
+            const value = formData[field as keyof typeof formData];
+            if (!value) {
+                newErrors[field as keyof typeof newErrors] = `${field} is required`;
+                formValid = false;
+            }
+        });
+
+        // Check if form is valid
+        if (!formValid) {
+            setErrors(newErrors);
+            return;
+        }
+
+        // Reset errors if form is valid
+        setErrors({
+            firstName: '',
+            lastName: '',
+            branchId: '',
+            mobileNo: '',
+            // address: '',
+            userName: '',
+            email: '',
+            role: '',
+            password: '',
+        });
+        try {
+            const response = await registerApi('/v1/auth/add-user', formData); // Call registerApi with formData
+            if (response.status === 200) {
+                showToast(response.data.message, 'success');
+                handleClose();
+            } else {
+                showToast(response.data.message || 'Registration failed', 'error');
+            }
+        } catch (error) {
+            showToast(error.message, 'error');
+        }
+    };
 
     return (
         <Card sx={{ maxWidth: 800, margin: 'auto', padding: 2 }}>
-        <CardContent>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h5" gutterBottom>
-                    Add New User
-                </Typography>
-                <IconButton onClick={handleClose} color="primary">
-                    <CloseIcon />
-                </IconButton>
-            </div>
-    
-            <form onSubmit={handleSubmit}>
-                <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                        <TextField
-                            label="First Name"
-                            variant="outlined"
-                            fullWidth
-                            margin="normal"
-                            name="firstName"
-                            value={formData.firstName}
-                            onChange={handleInputChange}
-                            onBlur={handleInputBlur}
-                            error={!!errors.firstName}
-                            helperText={errors.firstName}
-                        />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <TextField
-                            label="Last Name"
-                            variant="outlined"
-                            fullWidth
-                            margin="normal"
-                            name="lastName"
-                            value={formData.lastName}
-                            onChange={handleInputChange}
-                            onBlur={handleInputBlur}
-                            error={!!errors.lastName}
-                            helperText={errors.lastName}
-                        />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <TextField
-                            label="User Name"
-                            variant="outlined"
-                            fullWidth
-                            margin="normal"
-                            name="userName"
-                            value={formData.userName}
-                            onChange={handleInputChange}
-                            onBlur={handleInputBlur}
-                            error={!!errors.userName}
-                            helperText={errors.userName}
-                        />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <TextField
-                            label="Email ID"
-                            variant="outlined"
-                            fullWidth
-                            margin="normal"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            onBlur={handleInputBlur}
-                            error={!!errors.email}
-                            helperText={errors.email}
-                        />
-                    </Grid>
-                    <Grid item xs={6}>
-                    <TextField
-                    label="Branch Id"
-                    variant="outlined"
-                    fullWidth
-                    margin="normal"
-                    name="branchId"
-                    value={formData.branchId}
-                    onChange={handleInputChange}
-                    onBlur={handleInputBlur}
-                    error={!!errors.branchId}
-                    helperText={errors.branchId}
-                />
-                    </Grid >
-                    <Grid item xs={6}>
-                    <FormControl fullWidth margin="normal" error={!!errors.mobileNo}>
-                    <PhoneInput
-                        country="in"
-                        value={formData.mobileNo}
-                        onChange={handlePhoneChange}
-                        inputStyle={{ width: '100%' }}
-                        disableDropdown
-                        onlyCountries={['in']}
-                        specialLabel="Enter phone number"
-                    />
-                    {errors.mobileNo && <FormHelperText>{errors.mobileNo}</FormHelperText>}
-                </FormControl>
-                    </Grid>
-                    {/* <Grid item xs={6}>
+            <CardContent>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="h5" gutterBottom>
+                        Add New User
+                    </Typography>
+                    <IconButton onClick={handleClose} color="primary">
+                        <CloseIcon />
+                    </IconButton>
+                </div>
+
+                <form onSubmit={handleSubmit}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={6}>
+                            <TextField
+                                label="First Name"
+                                variant="outlined"
+                                fullWidth
+                                margin="normal"
+                                name="firstName"
+                                value={formData.firstName}
+                                onChange={handleInputChange}
+                                onBlur={handleInputBlur}
+                                error={!!errors.firstName}
+                                helperText={errors.firstName}
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
+                                label="Last Name"
+                                variant="outlined"
+                                fullWidth
+                                margin="normal"
+                                name="lastName"
+                                value={formData.lastName}
+                                onChange={handleInputChange}
+                                onBlur={handleInputBlur}
+                                error={!!errors.lastName}
+                                helperText={errors.lastName}
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
+                                label="User Name"
+                                variant="outlined"
+                                fullWidth
+                                margin="normal"
+                                name="userName"
+                                value={formData.userName}
+                                onChange={handleInputChange}
+                                onBlur={handleInputBlur}
+                                error={!!errors.userName}
+                                helperText={errors.userName}
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
+                                label="Email ID"
+                                variant="outlined"
+                                fullWidth
+                                margin="normal"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                onBlur={handleInputBlur}
+                                error={!!errors.email}
+                                helperText={errors.email}
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <FormControl fullWidth margin="normal" error={!!errors.branchId}>
+                                <InputLabel>Branch Name</InputLabel>
+                                <Select
+                                    variant="outlined"
+                                    label="Branch Name"
+                                    value={formData.branchId}  
+                                    name="branchId"
+                                    onChange={handleSelectChange} 
+                                    onBlur={handleInputBlur}
+                                >
+                                    {data.map((branch) => (
+                                        <MenuItem key={branch._id} value={branch._id}>
+                                            {branch.branchName}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                                <FormHelperText>{errors.branchId}</FormHelperText>
+                            </FormControl>
+                        </Grid >
+                        <Grid item xs={6}>
+                            <FormControl fullWidth margin="normal" error={!!errors.mobileNo}>
+                                <PhoneInput
+                                    country="in"
+                                    value={formData.mobileNo}
+                                    onChange={handlePhoneChange}
+                                    inputStyle={{ width: '100%' }}
+                                    disableDropdown
+                                    onlyCountries={['in']}
+                                    specialLabel="Enter phone number"
+                                />
+                                {errors.mobileNo && <FormHelperText>{errors.mobileNo}</FormHelperText>}
+                            </FormControl>
+                        </Grid>
+                        {/* <Grid item xs={6}>
                     <TextField
                     label="Address"
                     variant="outlined"
@@ -330,41 +351,41 @@ export function AddSalesMan({ handleClose }: AddSalesManProps) {
                     helperText={errors.address}
                 />
                     </Grid> */}
-                    <Grid item xs={6}>
-                    <TextField
-                            label="Role"
-                            variant="outlined"
-                            fullWidth
-                            margin="normal"
-                            name="role"
-                            value={formData.role}
-                            onChange={handleInputChange}
-                            onBlur={handleInputBlur}
-                            error={!!errors.role}
-                            helperText={errors.role}
-                        />
+                        <Grid item xs={6}>
+                            <TextField
+                                label="Role"
+                                variant="outlined"
+                                fullWidth
+                                margin="normal"
+                                name="role"
+                                value={formData.role}
+                                onChange={handleInputChange}
+                                onBlur={handleInputBlur}
+                                error={!!errors.role}
+                                helperText={errors.role}
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
+                                label="Password"
+                                variant="outlined"
+                                fullWidth
+                                margin="normal"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleInputChange}
+                                onBlur={handleInputBlur}
+                                error={!!errors.password}
+                                helperText={errors.password}
+                            />
+                        </Grid>
                     </Grid>
-                    <Grid item xs={6}>
-                    <TextField
-                            label="Password"
-                            variant="outlined"
-                            fullWidth
-                            margin="normal"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleInputChange}
-                            onBlur={handleInputBlur}
-                            error={!!errors.password}
-                            helperText={errors.password}
-                        />
-                    </Grid>
-                </Grid>
-                <Button type="submit" variant="contained" color="primary" fullWidth sx={{ marginTop: 2 }}>
-                    Add User
-                </Button>
-            </form>
-        </CardContent>
-    </Card>
-    
+                    <Button type="submit" variant="contained" color="primary" fullWidth sx={{ marginTop: 2 }}>
+                        Add User
+                    </Button>
+                </form>
+            </CardContent>
+        </Card>
+
     );
 }
