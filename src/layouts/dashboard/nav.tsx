@@ -144,7 +144,7 @@ export function NavContent({ data, slots, workspaces, sx }: NavContentProps) {
 
   return (
     <>
-      <Logo sx={{ marginLeft: '40px',width: '80px', height: '60px' }}/>
+      <Logo sx={{ marginLeft: '60px',width: '120px', height: '110px' }}/>
 
       {slots?.topArea}
 
