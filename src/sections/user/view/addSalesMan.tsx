@@ -22,9 +22,10 @@ import { ToastContext } from 'src/components/toaster/toastProvider';
 
 
 interface AddSalesManProps {
-    handleClose: () => void;  // Function passed from the parent
+    handleClose: () => void;
+    getAllUser: () => Promise<void>;  // Function passed from the parent
 }
-export function AddSalesMan({ handleClose }: AddSalesManProps) {
+export function AddSalesMan({ handleClose, getAllUser }: AddSalesManProps) {
     const { showToast } = useContext(ToastContext);
     const [data, setData] = useState<any[]>([]);
     const [formData, setFormData] = useState({
@@ -108,7 +109,7 @@ export function AddSalesMan({ handleClose }: AddSalesManProps) {
     };
 
     useEffect(() => {
-        getAllBranch()
+        getAllBranch();
     }, []);
 
     const getAllBranch = async () => {
@@ -224,7 +225,10 @@ export function AddSalesMan({ handleClose }: AddSalesManProps) {
             const response = await registerApi('/v1/auth/add-user', formData); // Call registerApi with formData
             if (response.status === 200) {
                 showToast(response.data.message, 'success');
-                handleClose();
+                setTimeout(() => {
+                    handleClose();
+                    getAllUser();
+                }, 2000); 
             } else {
                 showToast(response.data.message || 'Registration failed', 'error');
             }

@@ -25,7 +25,7 @@ const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   // Defining showToast using useCallback to ensure stability
   const showToast = useCallback(
-    (message: string, variant: VariantType, duration = 3000) => {
+    (message: string, variant: VariantType, duration = 2000) => {
       enqueueSnackbar(message, { variant, autoHideDuration: duration });
     },
     [enqueueSnackbar]

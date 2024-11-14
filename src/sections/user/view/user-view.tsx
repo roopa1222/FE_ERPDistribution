@@ -74,6 +74,8 @@ const dataFiltered: any[] = applyFilter({
     }
   };
 
+  console.log('data===', data)
+
   return (
     <>
        { dashboardContent && (
@@ -130,7 +132,7 @@ const dataFiltered: any[] = applyFilter({
                       <TableCell>{index + 1}</TableCell>
                       <TableCell>{row.firstName}</TableCell>
                       <TableCell>{row.lastName }</TableCell>
-                      <TableCell>{}</TableCell>
+                      <TableCell>{row.branchId.branchName}</TableCell>
                       <TableCell>{row.role}</TableCell>
                     </TableRow>
                   ))}
@@ -152,7 +154,7 @@ const dataFiltered: any[] = applyFilter({
       </Card>
     </DashboardContent>
     )}
-    {isFormOpen && <AddSalesMan handleClose={handleClose} />}
+    {isFormOpen && <AddSalesMan handleClose={handleClose} getAllUser={getAllUser} />}
     </>  
   );
 }
