@@ -12,11 +12,6 @@ const icon = (name: string) => (
     title: 'Dashboard',
     path: '/',
     icon: icon('ic-analytics'),
-  },
-  {
-    title: 'User',
-    path: '/user',
-    icon: icon('ic-user'),
   }];
   
   if(role === 'SALESMAN' || role === 'SUPER_ADMIN'){
@@ -24,13 +19,33 @@ routes.push(  {
   title: 'Branch',
   path: '/branch',
   icon:  icon('faCodeBranch'),
-},)
+},{
+  title: 'DSR-Invoice',
+  path: '/dsr-invoice',
+  icon:  icon('fareceipt'), 
+},{
+  title: 'User',
+  path: '/user',
+  icon: icon('ic-user'),
+})
   }
   if(role === 'ADMIN'){
-  routes.push();
+  routes.push(
+  {
+    title: 'User',
+    path: '/user',
+    icon: icon('ic-user'),
+  }
+  );
   }
   if(role === 'SUPER_ADMIN'){
-    routes.push();
+    routes.push(
+  {
+    title: 'User',
+    path: '/user',
+    icon: icon('ic-user'),
+  }
+    );
   }
 
 export const navData = routes;
