@@ -10,6 +10,7 @@ import { varAlpha } from 'src/theme/styles';
 import { AuthLayout } from 'src/layouts/auth';
 import { DashboardLayout } from 'src/layouts/dashboard';
 import { isAuthenticated } from 'src/service/authService';
+import { DsrInvoiceView } from 'src/sections/dsr-invoice/view';
 
 // Lazy-loaded pages
 const HomePage = lazy(() => import('src/pages/home'));
@@ -58,7 +59,7 @@ export function Router() {
       children: [
         { element: <HomePage />, index: true },
         { path: 'user', element: <UserPage /> },
-        { path: 'products', element: <ProductsPage /> },
+        { path: 'dsr-invoice', element: <DsrInvoiceView /> },
         { path: 'branch', element: <BranchPage /> },
       ],
     },
