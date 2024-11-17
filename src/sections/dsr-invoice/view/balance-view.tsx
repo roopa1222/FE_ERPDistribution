@@ -1,18 +1,78 @@
 import React, { useState } from "react";
-import { Button, Typography, Modal, Box, IconButton } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack"; // Back icon
-import BalanceForm from "./balance-form"; // Import BalanceForm instead of BalanceView
+import {
+  Button,
+  Typography,
+  Modal,
+  Box,
+  IconButton,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+} from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import BalanceForm from "./balance-form"; // Import BalanceForm
+
+type Balance = {
+  id: number;
+  openingBalance: number;
+  closingBalance: number;
+  date: string; // Format: YYYY-MM-DD
+};
 
 type BalanceViewProps = {
   balanceDataView: boolean;
-  handleBack: () => void; // Add handleBack to props
+  handleBack: () => void;
 };
 
 const BalanceView: React.FC<BalanceViewProps> = ({ balanceDataView, handleBack }) => {
+  const [balances, setBalances] = useState<Balance[]>([
+    { id: 1, openingBalance: 1000, closingBalance: 1500, date: "2024-11-01" },
+    { id: 2, openingBalance: 1500, closingBalance: 2000, date: "2024-11-05" },
+    { id: 3, openingBalance: 2000, closingBalance: 2500, date: "2024-11-10" },
+  ]);
+  const [filteredBalances, setFilteredBalances] = useState<Balance[]>(balances);
   const [openModal, setOpenModal] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
+  // Open and close modal handlers
   const handleOpenModal = () => setOpenModal(true);
   const handleCloseModal = () => setOpenModal(false);
+
+  // Filter balances by date range
+  const handleSearch = () => {
+    const filtered = balances.filter((balance) => {
+      const balanceDate = new Date(balance.date).getTime();
+      const start = startDate ? new Date(startDate).getTime() : null;
+      const end = endDate ? new Date(endDate).getTime() : null;
+      return (
+        (!start || balanceDate >= start) &&
+        (!end || balanceDate <= end)
+      );
+    });
+    setFilteredBalances(filtered);
+  };
+
+  // Reset filters
+  const handleClear = () => {
+    setStartDate("");
+    setEndDate("");
+    setFilteredBalances(balances);
+  };
+
+  // Pagination handlers
+  const handleChangePage = (event: unknown, newPage: number) => setPage(newPage);
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   return (
     <div>
@@ -31,7 +91,68 @@ const BalanceView: React.FC<BalanceViewProps> = ({ balanceDataView, handleBack }
         </Button>
       </Box>
 
-      {/* Modal for the Expense Form */}
+      {/* Filters */}
+      <Box display="flex" alignItems="center" gap={2} mb={3}>
+        <TextField
+          type="date"
+          label="Start Date"
+          InputLabelProps={{ shrink: true }}
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+        />
+        <TextField
+          type="date"
+          label="End Date"
+          InputLabelProps={{ shrink: true }}
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+        />
+        <Button variant="contained" color="inherit" onClick={handleSearch}>
+          Search
+        </Button>
+        <Button variant="outlined" color="secondary" onClick={handleClear}>
+          Clear
+        </Button>
+      </Box>
+
+      {/* Table */}
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>ID</TableCell>
+              <TableCell>Opening Balance</TableCell>
+              <TableCell>Closing Balance</TableCell>
+              <TableCell>Date</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredBalances
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((balance) => (
+                <TableRow key={balance.id}>
+                  <TableCell>{balance.id}</TableCell>
+                  <TableCell>{balance.openingBalance}</TableCell>
+                  <TableCell>{balance.closingBalance}</TableCell>
+                  <TableCell>{balance.date}</TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Pagination */}
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
+        component="div"
+        count={filteredBalances.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
+
+      {/* Modal */}
       <Modal open={openModal} onClose={handleCloseModal}>
         <Box
           sx={{
@@ -46,7 +167,7 @@ const BalanceView: React.FC<BalanceViewProps> = ({ balanceDataView, handleBack }
             p: 4,
           }}
         >
-          <BalanceForm onClose={handleCloseModal} /> {/* Render BalanceForm here */}
+          <BalanceForm onClose={handleCloseModal} /> {/* Render BalanceForm */}
         </Box>
       </Modal>
     </div>
