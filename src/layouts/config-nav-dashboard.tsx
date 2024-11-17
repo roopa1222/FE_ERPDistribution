@@ -14,12 +14,8 @@ const icon = (name: string) => (
     icon: icon('ic-analytics'),
   }];
   
-  if(role === 'SALESMAN' || role === 'SUPER_ADMIN'){
+  if(role === 'SALESMAN'){
 routes.push(  {
-  title: 'Branch',
-  path: '/branch',
-  icon:  icon('faCodeBranch'),
-},{
   title: 'DSR-Invoice',
   path: '/dsr-invoice',
   icon:  icon('fareceipt'), 
@@ -35,7 +31,15 @@ routes.push(  {
     title: 'User',
     path: '/user',
     icon: icon('ic-user'),
-  }
+  },{
+    title: 'Branch',
+    path: '/branch',
+    icon:  icon('faCodeBranch'),
+  }, {
+  title: 'DSR-Invoice',
+  path: '/dsr-invoice',
+  icon:  icon('fareceipt'), 
+},
   );
   }
   if(role === 'SUPER_ADMIN'){
@@ -44,7 +48,15 @@ routes.push(  {
     title: 'User',
     path: '/user',
     icon: icon('ic-user'),
-  }
+  },{
+    title: 'Branch',
+    path: '/branch',
+    icon:  icon('faCodeBranch'),
+  }, {
+    title: 'DSR-Invoice',
+    path: '/dsr-invoice',
+    icon:  icon('fareceipt'), 
+  },
     );
   }
 

@@ -61,6 +61,7 @@ export function BranchView() {
   const getAllBranch = async () => {
     try {
       const response = await getApi('/v1/branch/all-branches');
+      console.log('response',response);
       setData(response.data.data);
     } catch (error) {
       console.error('Error fetching data:', error); // Handle any error
