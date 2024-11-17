@@ -132,7 +132,7 @@ const dataFiltered: any[] = applyFilter({
                       <TableCell>{index + 1}</TableCell>
                       <TableCell>{row.firstName}</TableCell>
                       <TableCell>{row.lastName }</TableCell>
-                      <TableCell>{row.branchId.branchName}</TableCell>
+                      <TableCell>{row.branchName}</TableCell>
                       <TableCell>{row.role}</TableCell>
                     </TableRow>
                   ))}

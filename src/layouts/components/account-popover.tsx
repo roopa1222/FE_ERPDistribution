@@ -55,6 +55,8 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
       window.location.href = 'http://localhost:3039/sign-in';
   },[])
 
+   console.log('_myAccount=======>',_myAccount )
+
   return (
     <>
       <IconButton
@@ -74,30 +76,40 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
           {_myAccount.displayName.charAt(0).toUpperCase()} */}
         </Avatar>
       </IconButton>
-
+      {_myAccount?.role}
       <Popover
         open={!!openPopover}
         anchorEl={openPopover}
         onClose={handleClosePopover}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
         slotProps={{
           paper: {
             sx: { width: 200 },
           },
         }}
       >
-        <Box sx={{ p: 2, pb: 1.5 }}>
+        <Box sx={{ p: 1, pb: 1.5 }}>
           <Typography variant="subtitle2" noWrap>
             {_myAccount?.displayName}
           </Typography>
 
+          
+
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
             {_myAccount?.email}
           </Typography>
+
+        </Box>
+        <Divider sx={{ borderStyle: 'dashed' }} />
+
+        {/* <Box sx={{ p: 1 }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
+            {_myAccount?.role}
+          </Typography>
         </Box>
 
-        <Divider sx={{ borderStyle: 'dashed' }} />
+        <Divider sx={{ borderStyle: 'dashed' }} /> */}
 
         {/* <MenuList
           disablePadding

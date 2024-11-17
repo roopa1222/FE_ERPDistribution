@@ -50,16 +50,16 @@ export function AuthLayout({ sx, children, header }: AuthLayoutProps) {
               </Alert>
             ),
             leftArea: <Logo />,
-            rightArea: (
-              <Link
-                component={RouterLink}
-                href="#"
-                color="inherit"
-                sx={{ typography: 'subtitle2' }}
-              >
-                Need help?
-              </Link>
-            ),
+            // rightArea: (
+            //   <Link
+            //     component={RouterLink}
+            //     href="#"
+            //     color="inherit"
+            //     sx={{ typography: 'subtitle2' }}
+            //   >
+            //     Need help?
+            //   </Link>
+            // ),
           }}
         />
       }
