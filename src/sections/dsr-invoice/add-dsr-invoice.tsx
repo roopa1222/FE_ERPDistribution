@@ -39,6 +39,7 @@ const DsrAddInvoiceView = () => {
     productCode: Yup.string(),
     financeName: paymentModes.includes('Finance') ? Yup.string().required('Finance Name is Required') : Yup.string(),
     paymentMode: Yup.array().min(1, 'Please select at least one payment mode'),
+    branchId: Yup.string().required('Branch is Required'),
     customerName: Yup.string(),
     customerMobileNo: Yup.string()
       .matches(/^\d{10}$/, 'Enter a valid 10-digit mobile number'),
@@ -65,12 +66,17 @@ const DsrAddInvoiceView = () => {
     }, {} as Record<string, Yup.NumberSchema>),
   });
 
+  const branches = [
+    { _id: '1', branchName: "Branch A" },
+    { _id: '2', branchName: "Branch B" },
+    { _id: '3', branchName: "Branch C" },
+  ];
+
   // Effect hook to update totalAmount whenever payment mode fields change
   useEffect(() => {
     console.log('paymentModes',paymentModes);
     
     const updateTotalAmount = (values: FormValues, setFieldValue: any) => {
-    console.log('values====>',values);
 
       const totalAmount = paymentOptions.reduce((sum, option) => {
         const amountValue = values[`${option.toLowerCase()}Amount`] as string || '0';
@@ -82,25 +88,10 @@ const DsrAddInvoiceView = () => {
 
   useEffect(()=>{
 console.log('totalCalculatedAmount',totalCalculatedAmount);
-// getSetFieldValue(setFieldValues);
   },[totalCalculatedAmount])
 
 
   const amountFields = ['cashAmount', 'creditAmount', 'debitAmount', 'financeAmount', 'pendingAmount', 'upiAmount'];
-
-//   useEffect(() => {
-//     // This effect will only run when Formik's `values` or `setFieldValue` changes
-//     const calculateTotalAmount = (values: any) => {
-//       return amountFields.reduce((sum, field) => {
-//         // Convert string to number, use 0 if the value is an empty string
-//         const amount = parseFloat(values[field] as string) || 0;
-//         return sum + amount;
-//       }, 0);
-//     };
-
-//     // Here, `values` will be accessed within Formik’s render function, so you don’t need `values` here in `useEffect`
-//     setFieldValue('totalAmount', calculateTotalAmount(values));
-//   }, [amountFields, values, setFieldValue]);
 
   return (
     <Formik<FormValues>
@@ -111,6 +102,7 @@ console.log('totalCalculatedAmount',totalCalculatedAmount);
         paymentMode: [],
         customerName: '',
         customerMobileNo: '',
+        branchId:'',
         totalAmount: '',
         ...paymentOptions.reduce((initialValues, mode) => {
           initialValues[`${mode.toLowerCase()}Amount`] = ''; // Dynamic amounts initialization
@@ -128,6 +120,8 @@ console.log('totalCalculatedAmount',totalCalculatedAmount);
           customerName: values.customerName,
           customerMobileNo: values.customerMobileNo,
           totalAmount: totalCalculatedAmount,
+          financeName: values.financeName,
+          branchId: values.branchId,
           paymentDetails: paymentOptions.reduce((details, mode) => {
             const amount = values[`${mode.toLowerCase()}Amount`] as string; // Type assertion to 'string'
             if (amount) {
@@ -155,8 +149,6 @@ console.log('totalCalculatedAmount',totalCalculatedAmount);
           setPaymentModes(selectedModes);
           setFieldValue('paymentMode', selectedModes);
         };
-        console.log('values',values);
-
 
         const amounts = amountFields.reduce((sum, field) => {
             const amount = parseFloat(values[field] as string) || 0;
@@ -165,55 +157,7 @@ console.log('totalCalculatedAmount',totalCalculatedAmount);
 
         if(amounts > 0){
             setTotalCalculatedAmount(amounts);
-console.log('totalCalculatedAmount',totalCalculatedAmount);
-// getSetFieldValue(setFieldValue);
-            //   setFieldValue('totalAmount', totalCalculatedAmount);
         }
-
-        // useEffect(() => {
-            
-  
-        //     // Only update totalAmount if the calculated value changes
-        //     if (parseFloat(values.totalAmount) !== totalCalculatedAmount) {
-        //       setFieldValue('totalAmount', totalCalculatedAmount);
-        //     }
-        //   }, [values, setFieldValue]);
-        // if()
-
-//         // Define the keys for the fields you want to sum up
-// const amountFields = ['cashAmount', 'creditAmount', 'debitAmount', 'financeAmount', 'pendingAmount', 'upiAmount'];
-
-// // Function to calculate the total sum of amount fields
-// // const calculateTotalAmount = (values) => {
-//   const totalCalculatedAmount =  amountFields.reduce((sum, field) => {
-//     // Convert string to number, use 0 if the value is an empty string
-//     const amount = parseFloat(values[field] as string) || 0;
-//     return sum + amount;
-//   }, 0);
-//   if(totalCalculatedAmount > 0){
-//   setFieldValue('totalAmount',totalCalculatedAmount);
-//   }else{
-//     setFieldValue('totalAmount',0);
-
-//   }
-
-//   useEffect(() => {
-//     const totalCalculatedAmount = amountFields.reduce((sum, field) => {
-//       // Convert string to number, use 0 if the value is an empty string
-//       const amount = parseFloat(values[field] as string) || 0;
-//       return sum + amount;
-//     }, 0);
-
-//     // Update the totalAmount field in Formik
-//     setFieldValue('totalAmount', totalCalculatedAmount);
-//   }, [values, setFieldValue]); // Run only when values change
-
-
-  
-// };
-
-                
-
         return (
           <Form onSubmit={handleSubmit}>
             <Box display="flex" flexDirection="column" alignItems="center" mt={3}>
@@ -259,6 +203,33 @@ console.log('totalCalculatedAmount',totalCalculatedAmount);
                     helperText={touched.customerMobileNo && errors.customerMobileNo ? errors.customerMobileNo : ''}
                   />
                 </Grid>
+                <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+  <InputLabel>Branch Name</InputLabel>
+  <Select
+    value={values.branchId} // Ensure branchId is a string
+    onChange={(e) => handleChange(e)} // Update Formik value
+    input={<OutlinedInput label="Branch Name" />}
+    renderValue={(selected) => {
+      // Ensure selected is handled as a string
+      const branch = branches.find((branchData) => branchData._id === selected);
+      return branch ? branch.branchName : ''; // Display branch name or empty string
+    }}
+  >
+    {branches.map((branch) => (
+      <MenuItem key={branch._id} value={branch._id}>
+        {branch.branchName} {/* Display branch name */}
+      </MenuItem>
+    ))}
+  </Select>
+  <div style={{ color: 'red', fontSize: '0.8em' }}>
+    <ErrorMessage name="branchId" component="div" />
+  </div>
+</FormControl>
+
+
+</Grid>
+
 
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth>

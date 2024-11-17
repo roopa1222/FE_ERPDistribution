@@ -14,7 +14,6 @@ const BalanceForm: React.FC<BalanceFormProps> = ({ onClose }) => {
       .required("Opening Balance is required")
       .min(0, "Opening Balance must be greater than or equal to 0"),
     closingBalance: Yup.number()
-      .required("Closing Balance is required")
       .min(
         Yup.ref("openingBalance"),
         "Closing Balance must be greater than or equal to Opening Balance"
