@@ -25,26 +25,26 @@ import type { WorkspacesPopoverProps } from '../components/workspaces-popover';
 
 const renderAccount = (
   <Box
-    sx={{
-      my: 3,
-      mx: 2.5,
-      py: 2,
-      px: 2.5,
-      display: 'flex',
-      borderRadius: 1.5,
-      alignItems: 'center',
-      bgcolor: (theme) => alpha(theme.palette.grey[500], 0.12),
-    }}
+    // sx={{
+    //   my: 3,
+    //   mx: 2.5,
+    //   py: 2,
+    //   px: 2.5,
+    //   display: 'flex',
+    //   borderRadius: 1.5,
+    //   alignItems: 'center',
+    //   bgcolor: (theme) => alpha(theme.palette.grey[500], 0.12),
+    // }}
   >
-    <Avatar src={_myAccount.photoURL} alt="photoURL" />
+    {/* <Avatar src={_myAccount.photoURL} alt="photoURL" /> */}
 
-    <Box sx={{ ml: 2 }}>
+    {/* <Box sx={{ ml: 2 }}>
       <Typography variant="subtitle2">{_myAccount.displayName}</Typography>
 
       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
         {_myAccount.role}
       </Typography>
-    </Box>
+    </Box> */}
   </Box>
 );
 

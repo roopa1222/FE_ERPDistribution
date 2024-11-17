@@ -44,16 +44,16 @@ export function SimpleLayout({ sx, children, header, content }: SimpleLayoutProp
               </Alert>
             ),
             leftArea: <Logo />,
-            rightArea: (
-              <Link
-                href="#"
-                component={RouterLink}
-                color="inherit"
-                sx={{ typography: 'subtitle2' }}
-              >
-                Need help?
-              </Link>
-            ),
+            // rightArea: (
+            //   <Link
+            //     href="#"
+            //     component={RouterLink}
+            //     color="inherit"
+            //     sx={{ typography: 'subtitle2' }}
+            //   >
+            //     Need help?
+            //   </Link>
+            // ),
           }}
         />
       }
