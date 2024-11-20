@@ -18,7 +18,7 @@ import {
   OutlinedInput,
 } from '@mui/material';
 
-import { postApi } from 'src/service/api';
+import { getApi, postApi } from 'src/service/api';
 
 const paymentOptions = [
   'UPI',
@@ -33,6 +33,11 @@ const paymentOptions = [
 
 const category = ['MOBILE', 'ELECTRONICS', 'ACCESSORIES'];
 
+interface Branch {
+  _id: string;
+  branchName: string;
+}
+
 interface FormValues {
   productName: string;
   productCode: string;
@@ -46,26 +51,36 @@ interface FormValues {
   [key: string]: string | string[]; // Allow dynamic keys like UPIAmount, CashAmount, etc.
 }
 
+const RequiredLabel = ({ label }: { label: string }) => (
+  <Typography component="span" sx={{ display: 'inline', fontSize: '1rem' }}>
+    {label}
+    <Typography component="span" sx={{ color: 'red', marginLeft: '2px' }}>
+      *
+    </Typography>
+  </Typography>
+);
+
 const DsrAddInvoiceView = () => {
   const [paymentModes, setPaymentModes] = useState<string[]>([]); // Maintain payment modes state
   const [totalCalculatedAmount, setTotalCalculatedAmount] = useState(0);
   const [roleWiseAccess, setRoleWiseAccess] = useState(false);
+  const [branchData, setBranchData] = useState<Branch[]>([]);
 
   useEffect(() => {
     const role = localStorage.getItem('role');
     if (role === 'SALESMAN') {
       setRoleWiseAccess(true);
+    } else {
+      getBrachData();
     }
   }, []);
 
-  const RequiredLabel = ({ label }: { label: string }) => (
-    <Typography component="span" sx={{ display: 'inline', fontSize: '1rem' }}>
-      {label}
-      <Typography component="span" sx={{ color: 'red', marginLeft: '2px' }}>
-        *
-      </Typography>
-    </Typography>
-  );
+  const getBrachData = async () => {
+    const response = await getApi('/v1/branch/all-branches');
+    if (response) {
+      setBranchData(response.data.data);
+    }
+  };
 
   // Validation schema setup
   const validationSchema = Yup.object().shape({
@@ -112,25 +127,6 @@ const DsrAddInvoiceView = () => {
     ),
   });
 
-  const branches = [
-    { _id: '1', branchName: 'Branch A' },
-    { _id: '2', branchName: 'Branch B' },
-    { _id: '3', branchName: 'Branch C' },
-  ];
-
-  // Effect hook to update totalAmount whenever payment mode fields change
-  useEffect(() => {
-    const updateTotalAmount = (values: FormValues, setFieldValue: any) => {
-      const totalAmount = paymentOptions.reduce((sum, option) => {
-        const amountValue = (values[`${option.toLowerCase()}Amount`] as string) || '0';
-        return sum + (parseFloat(amountValue) || 0);
-      }, 0);
-      setFieldValue('totalAmount', totalAmount.toString());
-    };
-  }, [paymentModes]); // Dependency array, re-run when paymentModes change
-
-  useEffect(() => {}, [totalCalculatedAmount]);
-
   const amountFields = [
     'cashAmount',
     'creditAmount',
@@ -172,14 +168,30 @@ const DsrAddInvoiceView = () => {
           customerName: values.customerName,
           customerMobileNo: values.customerMobileNo,
           totalAmount: totalCalculatedAmount,
-          firstFinanceName: values.firstFinanceName,
-          secondFinanceName: values.secondFinanceName,
           category: values.category,
           branchId: values.branchId,
+          financeDetails: [
+            ...(values.firstFinanceName
+              ? [
+                  {
+                    financeName: values.firstFinanceName,
+                    amount: values['1financeAmount'] || '0',
+                  },
+                ]
+              : []),
+            ...(values.secondFinanceName
+              ? [
+                  {
+                    financeName: values.secondFinanceName,
+                    amount: values['2financeAmount'] || '0',
+                  },
+                ]
+              : []),
+          ],
           paymentDetails: paymentOptions.reduce(
             (details, mode) => {
               const amount = values[`${mode.toLowerCase()}Amount`] as string; // Type assertion to 'string'
-              if (amount) {
+              if (amount && parseFloat(amount) > 0) {
                 details.push({ mode, amount });
               }
               return details;
@@ -201,9 +213,16 @@ const DsrAddInvoiceView = () => {
         // Update paymentModes based on selected payment modes
         const handlePaymentModeChange = (e: any) => {
           const selectedModes = e.target.value;
+
           const deselectedModes = paymentModes.filter((mode) => !selectedModes.includes(mode));
+
           deselectedModes.forEach((mode) => {
             setFieldValue(`${mode.toLowerCase()}Amount`, '0');
+            if (mode === '1Finance') {
+              setFieldValue('firstFinanceName', '');
+            } else if (mode === '2Finance') {
+              setFieldValue('secondFinanceName', '');
+            }
           });
           setPaymentModes(selectedModes);
           setFieldValue('paymentMode', selectedModes);
@@ -272,12 +291,12 @@ const DsrAddInvoiceView = () => {
                   <Grid item xs={12} sm={6}>
                     <FormControl fullWidth>
                       <Autocomplete
-                        options={branches}
+                        options={branchData}
                         getOptionLabel={(option) => option.branchName || ''}
                         isOptionEqualToValue={(option, value) =>
                           value && typeof value === 'object' && option._id === value._id
                         }
-                        value={branches.find((branch) => branch._id === values.branchId) || null}
+                        value={branchData.find((branch) => branch._id === values.branchId) || null}
                         onChange={(event, value) => {
                           setFieldValue('branchId', value ? value._id : '');
                         }}
