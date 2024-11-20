@@ -167,7 +167,7 @@ const DsrAddInvoiceView = () => {
       onSubmit={async (values) => {
         const formData = {
           productName: values.productName,
-          productCode: values.productCode,
+          serialNo: values.productCode,
           paymentMode: values.paymentMode,
           customerName: values.customerName,
           customerMobileNo: values.customerMobileNo,
@@ -236,7 +236,7 @@ const DsrAddInvoiceView = () => {
                     as={TextField}
                     fullWidth
                     name="productCode"
-                    label="Product Code"
+                    label="Serial Number"
                     error={Boolean(touched.productCode && errors.productCode)}
                     helperText={touched.productCode && errors.productCode ? errors.productCode : ''}
                   />
