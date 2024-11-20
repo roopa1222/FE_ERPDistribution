@@ -1,99 +1,171 @@
+import React, { ReactNode, useEffect, useState, useCallback } from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
+import { Box, Button, Card, CardContent, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from '@mui/material';
 
 import { _tasks, _posts, _timeline } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { getApi, getBranchData } from 'src/service/branchApi';
 
-import { AnalyticsNews } from '../analytics-news';
-import { AnalyticsTasks } from '../analytics-tasks';
+
 import { AnalyticsCurrentVisits } from '../analytics-current-visits';
-import { AnalyticsOrderTimeline } from '../analytics-order-timeline';
-import { AnalyticsWebsiteVisits } from '../analytics-website-visits';
-import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
-import { AnalyticsTrafficBySite } from '../analytics-traffic-by-site';
-import { AnalyticsCurrentSubject } from '../analytics-current-subject';
-import { AnalyticsConversionRates } from '../analytics-conversion-rates';
 
 // ----------------------------------------------------------------------
 
 export function OverviewAnalyticsView() {
+  const [from, setStartDate] = useState<string>("");
+  const [to, setEndDate] = useState<string>("");
+  const [branchId, setDropdownValue] = useState('');
+  const [data, setData] = useState<any[]>([]);
+  const [dashboardData, setdashboardData] = useState<any>('');
+  const [loading, setLoading] = useState(false);
+
+
+  const getAllUser = async () => {
+    try {
+      const response = await getApi('/v1/branch/all-branches');
+      setData(response.data.data);
+    } catch (error) {
+      console.error('Error fetching data:', error); // Handle any error
+    }
+  };
+
+
+  const handleInputChange = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params: any = {};
+      if (branchId) params.branchId = branchId;
+      if (from) params.from = from;
+      if (to) params.to = to;
+      const response = await getBranchData(`/v1/dsrInvoice/dashboard-count`, { params });
+      setdashboardData(response.data.dashBoardCount);
+    } catch (error) {
+      console.error("Error fetching data", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [branchId, from, to]);  // This ensures the callback is memoized and only reruns when the dependencies change
+
+  useEffect(() => {
+    getAllUser();
+    handleInputChange();
+  }, [handleInputChange]);
+
+
+
   return (
     <DashboardContent maxWidth="xl">
-      <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
-        Hi, Welcome back 👋
-      </Typography>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '10vh', // Full viewport height
+          textAlign: 'center',
+        }}
+      >
+        <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
+          Welcome to the Tanishka Telecom
+        </Typography>
+      </Box>
 
-      <Grid container spacing={3}>
-        <Grid xs={12} sm={6} md={3}>
-          <AnalyticsWidgetSummary
-            title="Weekly sales"
-            percent={2.6}
-            total={714000}
-            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-bag.svg" />}
-            chart={{
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-              series: [22, 8, 35, 50, 82, 84, 77, 12],
-            }}
+      <Box display="flex" justifyContent="space-between" gap={2} alignItems="center" >
+        {/* Branch Name - Left side */}
+        <FormControl sx={{ minWidth: 300 }} >
+          <InputLabel shrink htmlFor="branch-select" >Branch Name</InputLabel>
+          <Select
+            labelId="dropdown-label"
+            variant="outlined"
+            label="Branch Name"
+            value={branchId}
+            // onChange={handleSelectChange}
+            displayEmpty
+            onChange={(e) => setDropdownValue(e.target.value)}
+          >
+            <MenuItem value="" disabled>
+              Search...
+            </MenuItem>
+            {data.map((branch) => (
+              <MenuItem key={branch._id} value={branch._id}>
+                {branch.branchName}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        {/* Right side - Start Date, End Date, and Search Button */}
+        <Box display="flex" gap={2}>
+          <TextField
+            label="Start Date"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={from}
+            onChange={(e) => setStartDate(e.target.value)}
+            sx={{ width: 300 }}
           />
-        </Grid>
-
-        <Grid xs={12} sm={6} md={3}>
-          <AnalyticsWidgetSummary
-            title="New users"
-            percent={-0.1}
-            total={1352831}
-            color="secondary"
-            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-users.svg" />}
-            chart={{
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-              series: [56, 47, 40, 62, 73, 30, 23, 54],
-            }}
+          <TextField
+            label="End Date"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={to}
+            onChange={(e) => setEndDate(e.target.value)}
+            sx={{ width: 300 }}
           />
-        </Grid>
+        </Box>
+      </Box>
 
-        <Grid xs={12} sm={6} md={3}>
-          <AnalyticsWidgetSummary
-            title="Purchase orders"
-            percent={2.8}
-            total={1723315}
-            color="warning"
-            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-buy.svg" />}
-            chart={{
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-              series: [40, 70, 50, 28, 70, 75, 7, 64],
-            }}
-          />
-        </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
-          <AnalyticsWidgetSummary
-            title="Messages"
-            percent={3.6}
-            total={234}
-            color="error"
-            icon={<img alt="icon" src="/assets/icons/glass/ic-glass-message.svg" />}
-            chart={{
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-              series: [56, 30, 23, 54, 47, 40, 62, 73],
-            }}
-          />
+      <Box sx={{ mt: 3 }}>
+        <Grid container spacing={3}>
+          {/* First Row */}
+          <Grid xs={12} sm={6} md={4}>
+            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Typography variant="h4" color="primary">
+                  {dashboardData.accessoriesCount}
+                </Typography>
+                <Typography variant="subtitle1">Total Accesseries count</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid xs={12} sm={6} md={4}>
+            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Typography variant="h4" color="primary">
+                  {dashboardData.mobileCount}
+                </Typography>
+                <Typography variant="subtitle1">Total Mobile Count</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid xs={12} sm={6} md={4}>
+            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Typography variant="h4" color="primary">
+                  {dashboardData.electronicCount}
+                </Typography>
+                <Typography variant="subtitle1">Total Element Count</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
-          <AnalyticsCurrentVisits
-            title="Current visits"
-            chart={{
-              series: [
-                { label: 'America', value: 3500 },
-                { label: 'Asia', value: 2500 },
-                { label: 'Europe', value: 1500 },
-                { label: 'Africa', value: 500 },
-              ],
-            }}
-          />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={8}>
+      </Box>
+      <Box sx={{ mt: 3 }}>
+        <Grid container spacing={3}>
+          <Grid xs={12} md={4} lg={4}>
+            <AnalyticsCurrentVisits
+              title="Current Data"
+              chart={{
+                series: [
+                  { label: 'Accesseries count', value: dashboardData.accessoriesCount || 0 },
+                  { label: 'Mobile Count', value: dashboardData.mobileCount || 0 },
+                  { label: 'Element Count', value: dashboardData.electronicCount || 0 },
+                ],
+              }}
+            />
+          </Grid>
+          {/* <Grid xs={12} md={4} lg={8}>
           <AnalyticsWebsiteVisits
             title="Website visits"
             subheader="(+43%) than last year"
@@ -105,60 +177,10 @@ export function OverviewAnalyticsView() {
               ],
             }}
           />
+        </Grid> */}
         </Grid>
+      </Box>
 
-        <Grid xs={12} md={6} lg={8}>
-          <AnalyticsConversionRates
-            title="Conversion rates"
-            subheader="(+43%) than last year"
-            chart={{
-              categories: ['Italy', 'Japan', 'China', 'Canada', 'France'],
-              series: [
-                { name: '2022', data: [44, 55, 41, 64, 22] },
-                { name: '2023', data: [53, 32, 33, 52, 13] },
-              ],
-            }}
-          />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
-          <AnalyticsCurrentSubject
-            title="Current subject"
-            chart={{
-              categories: ['English', 'History', 'Physics', 'Geography', 'Chinese', 'Math'],
-              series: [
-                { name: 'Series 1', data: [80, 50, 30, 40, 100, 20] },
-                { name: 'Series 2', data: [20, 30, 40, 80, 20, 80] },
-                { name: 'Series 3', data: [44, 76, 78, 13, 43, 10] },
-              ],
-            }}
-          />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={8}>
-          <AnalyticsNews title="News" list={_posts.slice(0, 5)} />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
-          <AnalyticsOrderTimeline title="Order timeline" list={_timeline} />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
-          <AnalyticsTrafficBySite
-            title="Traffic by site"
-            list={[
-              { value: 'facebook', label: 'Facebook', total: 323234 },
-              { value: 'google', label: 'Google', total: 341212 },
-              { value: 'linkedin', label: 'Linkedin', total: 411213 },
-              { value: 'twitter', label: 'Twitter', total: 443232 },
-            ]}
-          />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={8}>
-          <AnalyticsTasks title="Tasks" list={_tasks} />
-        </Grid>
-      </Grid>
     </DashboardContent>
   );
 }

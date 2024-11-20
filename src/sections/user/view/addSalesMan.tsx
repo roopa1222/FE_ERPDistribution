@@ -123,11 +123,14 @@ export function AddSalesMan({ handleClose, getAllUser }: AddSalesManProps) {
 
     // Handle Select Change
     const handleSelectChange = (event: SelectChangeEvent<string>) => {
-        setFormData({
-          ...formData,
-          branchId: event.target.value, // This should update the branchId in formData
-        });
-      };
+        const { name, value } = event.target; 
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value, 
+        }));
+    };
+
+
 
     // Handle Input Blur (trigger validation when user clicks out of the field)
     const handleInputBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -228,7 +231,7 @@ export function AddSalesMan({ handleClose, getAllUser }: AddSalesManProps) {
                 setTimeout(() => {
                     handleClose();
                     getAllUser();
-                }, 2000); 
+                }, 2000);
             } else {
                 showToast(response.data.message || 'Registration failed', 'error');
             }
@@ -313,9 +316,9 @@ export function AddSalesMan({ handleClose, getAllUser }: AddSalesManProps) {
                                 <Select
                                     variant="outlined"
                                     label="Branch Name"
-                                    value={formData.branchId}  
+                                    value={formData.branchId}
                                     name="branchId"
-                                    onChange={handleSelectChange} 
+                                    onChange={handleSelectChange}
                                     onBlur={handleInputBlur}
                                 >
                                     {data.map((branch) => (
@@ -356,19 +359,29 @@ export function AddSalesMan({ handleClose, getAllUser }: AddSalesManProps) {
                 />
                     </Grid> */}
                         <Grid item xs={6}>
-                            <TextField
-                                label="Role"
+                            <FormControl
                                 variant="outlined"
                                 fullWidth
                                 margin="normal"
-                                name="role"
-                                value={formData.role}
-                                onChange={handleInputChange}
-                                onBlur={handleInputBlur}
                                 error={!!errors.role}
-                                helperText={errors.role}
-                            />
+                            >
+                                <InputLabel id="role-label">Role</InputLabel>
+                                <Select
+                                    labelId="role-label"
+                                    label="Role"
+                                    name="role"
+                                    value={formData.role}
+                                    onChange={handleSelectChange}
+                                    onBlur={handleInputBlur}
+                                >
+                                    <MenuItem value="ADMIN">Admin</MenuItem>
+                                    <MenuItem value="SALESMAN">Salesman</MenuItem>
+                                    <MenuItem value="SUPER_ADMIN">Super Admin</MenuItem>
+                                </Select>
+                                {errors.role && <FormHelperText>{errors.role}</FormHelperText>}
+                            </FormControl>
                         </Grid>
+
                         <Grid item xs={6}>
                             <TextField
                                 label="Password"
