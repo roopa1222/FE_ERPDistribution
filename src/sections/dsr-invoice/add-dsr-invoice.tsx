@@ -11,6 +11,7 @@ import {
   Checkbox,
   TextField,
   InputLabel,
+  Typography,
   FormControl,
   ListItemText,
   Autocomplete,
@@ -56,6 +57,15 @@ const DsrAddInvoiceView = () => {
       setRoleWiseAccess(true);
     }
   }, []);
+
+  const RequiredLabel = ({ label }: { label: string }) => (
+    <Typography component="span" sx={{ display: 'inline', fontSize: '1rem' }}>
+      {label}
+      <Typography component="span" sx={{ color: 'red', marginLeft: '2px' }}>
+        *
+      </Typography>
+    </Typography>
+  );
 
   // Validation schema setup
   const validationSchema = Yup.object().shape({
@@ -110,7 +120,6 @@ const DsrAddInvoiceView = () => {
 
   // Effect hook to update totalAmount whenever payment mode fields change
   useEffect(() => {
-
     const updateTotalAmount = (values: FormValues, setFieldValue: any) => {
       const totalAmount = paymentOptions.reduce((sum, option) => {
         const amountValue = (values[`${option.toLowerCase()}Amount`] as string) || '0';
@@ -120,8 +129,7 @@ const DsrAddInvoiceView = () => {
     };
   }, [paymentModes]); // Dependency array, re-run when paymentModes change
 
-  useEffect(() => {
-  }, [totalCalculatedAmount]);
+  useEffect(() => {}, [totalCalculatedAmount]);
 
   const amountFields = [
     'cashAmount',
@@ -157,10 +165,9 @@ const DsrAddInvoiceView = () => {
       }}
       validationSchema={validationSchema}
       onSubmit={async (values) => {
-
         const formData = {
           productName: values.productName,
-          productCode: values.productCode,
+          serialNo: values.productCode,
           paymentMode: values.paymentMode,
           customerName: values.customerName,
           customerMobileNo: values.customerMobileNo,
@@ -219,7 +226,7 @@ const DsrAddInvoiceView = () => {
                     as={TextField}
                     fullWidth
                     name="productName"
-                    label="Product Name"
+                    label={<RequiredLabel label="Product Name" />}
                     error={Boolean(touched.productName && errors.productName)}
                     helperText={touched.productName && errors.productName ? errors.productName : ''}
                   />
@@ -229,7 +236,7 @@ const DsrAddInvoiceView = () => {
                     as={TextField}
                     fullWidth
                     name="productCode"
-                    label="Product Code"
+                    label="Serial Number"
                     error={Boolean(touched.productCode && errors.productCode)}
                     helperText={touched.productCode && errors.productCode ? errors.productCode : ''}
                   />
@@ -282,7 +289,7 @@ const DsrAddInvoiceView = () => {
                         renderInput={(params) => (
                           <TextField
                             {...params}
-                            label="Select Branch"
+                            label={<RequiredLabel label="Select Branch" />}
                             error={touched.branchId && Boolean(errors.branchId)}
                             helperText={touched.branchId && errors.branchId}
                           />
@@ -307,7 +314,7 @@ const DsrAddInvoiceView = () => {
                       renderInput={(params) => (
                         <TextField
                           {...params}
-                          label="Select Category"
+                          label={<RequiredLabel label="Select Category" />}
                           variant="outlined"
                           error={Boolean(touched.category && errors.category)}
                           helperText={touched.category && errors.category ? errors.category : ''}
@@ -320,12 +327,16 @@ const DsrAddInvoiceView = () => {
 
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth>
-                    <InputLabel>Payment Mode</InputLabel>
+                    <InputLabel>
+                      <RequiredLabel label="Select Payment Mode" />
+                    </InputLabel>
                     <Select
                       multiple
                       value={values.paymentMode}
                       onChange={handlePaymentModeChange}
-                      input={<OutlinedInput label="Payment Mode" />}
+                      input={
+                        <OutlinedInput label={<RequiredLabel label="Select Payment Mode" />} />
+                      }
                       renderValue={(selected) => selected.join(', ')}
                     >
                       {paymentOptions.map((option) => (
@@ -346,8 +357,8 @@ const DsrAddInvoiceView = () => {
                     <Field
                       as={TextField}
                       fullWidth
-                      name="1Finance"
-                      label="First Finance Name"
+                      name="firstFinanceName"
+                      label={<RequiredLabel label="First Finance Name" />}
                       error={Boolean(touched.firstFinanceName && errors.firstFinanceName)}
                       helperText={
                         touched.firstFinanceName && errors.firstFinanceName
@@ -362,8 +373,8 @@ const DsrAddInvoiceView = () => {
                     <Field
                       as={TextField}
                       fullWidth
-                      name="2Finance"
-                      label="Second Finance Name"
+                      name="secondFinanceName"
+                      label={<RequiredLabel label="Second Finance Name" />}
                       error={Boolean(touched.secondFinanceName && errors.secondFinanceName)}
                       helperText={
                         touched.secondFinanceName && errors.secondFinanceName
@@ -381,7 +392,7 @@ const DsrAddInvoiceView = () => {
                       as={TextField}
                       fullWidth
                       name={`${mode.toLowerCase()}Amount`}
-                      label={`${mode} Amount`}
+                      label={<RequiredLabel label={`${mode} Amount`} />}
                       error={Boolean(
                         touched[`${mode.toLowerCase()}Amount`] &&
                           errors[`${mode.toLowerCase()}Amount`]
