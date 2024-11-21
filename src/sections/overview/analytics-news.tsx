@@ -13,26 +13,26 @@ import { fToNow } from 'src/utils/format-time';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 
-import type { PostItemProps } from '../branch/post-item';
+// import type { PostItemProps } from '../branch/add-branch';
 
 // ----------------------------------------------------------------------
 
 type Props = CardProps & {
   title?: string;
   subheader?: string;
-  list: PostItemProps[];
+  // list: PostItemProps[];
 };
 
-export function AnalyticsNews({ title, subheader, list, ...other }: Props) {
+export function AnalyticsNews({ title, subheader, ...other }: Props) {
   return (
     <Card {...other}>
       <CardHeader title={title} subheader={subheader} sx={{ mb: 1 }} />
 
       <Scrollbar sx={{ minHeight: 405 }}>
         <Box sx={{ minWidth: 640 }}>
-          {list.map((post) => (
+          {/* {list.map((post) => (
             <PostItem key={post.id} item={post} />
-          ))}
+          ))} */}
         </Box>
       </Scrollbar>
 
@@ -51,7 +51,7 @@ export function AnalyticsNews({ title, subheader, list, ...other }: Props) {
 
 // ----------------------------------------------------------------------
 
-function PostItem({ sx, item, ...other }: BoxProps & { item: Props['list'][number] }) {
+function PostItem({ sx, item, ...other }: BoxProps & { item:[number] }) {
   return (
     <Box
       sx={{
@@ -67,20 +67,20 @@ function PostItem({ sx, item, ...other }: BoxProps & { item: Props['list'][numbe
     >
       <Avatar
         variant="rounded"
-        alt={item.title}
-        src={item.coverUrl}
+        // alt={item.title}
+        // src={item.coverUrl}
         sx={{ width: 48, height: 48, flexShrink: 0 }}
       />
 
       <ListItemText
-        primary={item.title}
-        secondary={item.description}
+        // primary={item.title}
+        // secondary={item.description}
         primaryTypographyProps={{ noWrap: true, typography: 'subtitle2' }}
         secondaryTypographyProps={{ mt: 0.5, noWrap: true, component: 'span' }}
       />
 
       <Box sx={{ flexShrink: 0, color: 'text.disabled', typography: 'caption' }}>
-        {fToNow(item.postedAt)}
+        {/* {fToNow(item.postedAt)} */}
       </Box>
     </Box>
   );

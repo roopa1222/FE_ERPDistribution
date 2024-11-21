@@ -18,7 +18,7 @@ const icon = (name: string) => (
 routes.push(  {
   title: 'DSR-Invoice',
   path: '/dsr-invoice',
-  icon:  icon('fareceipt'), 
+  icon:  icon('ic-dsrinvoice'), 
 },{
   title: 'User',
   path: '/user',
@@ -38,7 +38,7 @@ routes.push(  {
   }, {
   title: 'DSR-Invoice',
   path: '/dsr-invoice',
-  icon:  icon('fareceipt'), 
+  icon:  icon('ic-dsrinvoice'), 
 },
   );
   }
@@ -55,7 +55,7 @@ routes.push(  {
   }, {
     title: 'DSR-Invoice',
     path: '/dsr-invoice',
-    icon:  icon('fareceipt'), 
+    icon:  icon('ic-dsrinvoice'), 
   },
     );
   }

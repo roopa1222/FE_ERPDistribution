@@ -8,7 +8,7 @@ import Button from '@mui/material/Button';
 import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
-import { TableRow, TableCell, TableHead, IconButton, TablePagination } from '@mui/material';
+import { TableRow, TableCell, TableHead, IconButton, TablePagination, Modal } from '@mui/material';
 
 import { getApi } from 'src/service/branchApi';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -20,6 +20,7 @@ import { Scrollbar } from 'src/components/scrollbar';
 import { UserTableToolbar } from 'src/sections/user/user-table-toolbar';
 
 import { applyFilter, getComparator } from '../utils';
+import AddBranch from '../add-branch';
 
 
 
@@ -33,8 +34,10 @@ export function BranchView() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [data, setData] = useState<any[]>([]);
   const [filterName, setFilterName] = useState('');
+  const [openModal, setOpenModal] = useState(false);
 
-
+  const handleOpenModal = () => setOpenModal(true);
+  const handleCloseModal = () => setOpenModal(false);
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
   };
@@ -84,11 +87,28 @@ export function BranchView() {
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
+          onClick={handleOpenModal}
         >
           Add Branch
         </Button>
       </Box>
-
+      <Modal open={openModal} onClose={handleCloseModal}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <AddBranch onClose={() => handleCloseModal()} />
+        </Box>
+      </Modal>
       <Card>
       <UserTableToolbar
           numSelected={table.selected.length}

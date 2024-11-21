@@ -1,0 +1,23 @@
+ <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Document Shape */}
+      <path
+        d="M6 2C4.89 2 4 2.89 4 4V20C4 21.1 4.89 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2H6Z"
+        fill="#E0E0E0"
+      />
+      <path
+        d="M14 2V8H20"
+        fill="#B0BEC5"
+      />
+
+      {/* Financial Symbol */}
+      <path
+        d="M8 11H16V13H8V11ZM8 15H12V17H8V15Z"
+        fill="#637381"
+      />
+    </svg>
