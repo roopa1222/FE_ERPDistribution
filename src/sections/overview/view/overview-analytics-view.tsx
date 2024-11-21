@@ -145,7 +145,7 @@ export function OverviewAnalyticsView() {
                 <Typography variant="h4" color="primary">
                   {dashboardData.electronicCount}
                 </Typography>
-                <Typography variant="subtitle1">Total Element Count</Typography>
+                <Typography variant="subtitle1">Total Electronic Count</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -160,7 +160,7 @@ export function OverviewAnalyticsView() {
                 series: [
                   { label: 'Accesseries count', value: dashboardData.accessoriesCount || 0 },
                   { label: 'Mobile Count', value: dashboardData.mobileCount || 0 },
-                  { label: 'Element Count', value: dashboardData.electronicCount || 0 },
+                  { label: 'Electronic Count', value: dashboardData.electronicCount || 0 },
                 ],
               }}
             />
