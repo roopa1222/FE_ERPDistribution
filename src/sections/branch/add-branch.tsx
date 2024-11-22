@@ -1,15 +1,18 @@
-import React from "react";
+import React, { useContext } from "react";
 import * as Yup from "yup";
 import { Form, Field, Formik } from "formik";
 
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { postApi } from "src/service/api";
+import { ToastContext } from 'src/components/toaster/toastProvider';
 
 type AddBranchProps = {
     onClose: () => void;
 };
-
 const AddBranch: React.FC<AddBranchProps> = ({ onClose }) => {
+
+    const { showToast } = useContext(ToastContext);
+
     // Validation Schema
     const validationSchema = Yup.object({
         branchName: Yup.string().required("Expense Name is required"),
@@ -17,11 +20,18 @@ const AddBranch: React.FC<AddBranchProps> = ({ onClose }) => {
 
     // Form Submission
     const handleSubmit = async (values: { branchName: string; }) => {
-        console.log("Expense Data:", values);
-        const response = await postApi('v1/branch/add-branch', values);
-        console.log('response===>>>', response)
+        const branchData = [{ branchName: values.branchName }];
+        const response = await postApi('/v1/branch/add-branch', branchData);
+        if (response.status === 200) {
+            showToast(response.data.message, 'success');
+            setTimeout(() => {
+            }, 2000);
+        } else {
+            showToast(response.data.message || 'Add Branch failed', 'error');
+        }
         onClose();
     };
+
 
     return (
         <Formik
