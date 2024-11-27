@@ -8,8 +8,9 @@ import { ToastContext } from 'src/components/toaster/toastProvider';
 
 type AddBranchProps = {
     onClose: () => void;
+    getAllBranch: () => Promise<void>;
 };
-const AddBranch: React.FC<AddBranchProps> = ({ onClose }) => {
+const AddBranch: React.FC<AddBranchProps> = ({ onClose, getAllBranch }) => {
 
     const { showToast } = useContext(ToastContext);
 
@@ -26,6 +27,7 @@ const AddBranch: React.FC<AddBranchProps> = ({ onClose }) => {
             showToast(response.data.message, 'success');
             setTimeout(() => {
             }, 2000);
+            getAllBranch()
         } else {
             showToast(response.data.message || 'Add Branch failed', 'error');
         }
