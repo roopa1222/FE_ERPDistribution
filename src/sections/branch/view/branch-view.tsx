@@ -106,7 +106,7 @@ export function BranchView() {
             p: 4,
           }}
         >
-          <AddBranch onClose={() => handleCloseModal()} />
+          <AddBranch onClose={() => handleCloseModal()}  getAllBranch={()=>getAllBranch()}/>
         </Box>
       </Modal>
       <Card>

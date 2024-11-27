@@ -1,13 +1,17 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { Button, TextField, Box, Typography } from "@mui/material";
+import { ToastContext } from "src/components/toaster/toastProvider";
+import { postApi } from "src/service/api";
 
 type ExpenseFormProps = {
   onClose: () => void;
 };
 
 const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose }) => {
+  const { showToast } = useContext(ToastContext);
+
   // Validation Schema
   const validationSchema = Yup.object({
     expenseName: Yup.string().required("Expense Name is required"),
@@ -17,8 +21,15 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose }) => {
   });
 
   // Form Submission
-  const handleSubmit = (values: { expenseName: string; expenseAmount: number }) => {
-    console.log("Expense Data:", values);
+  const handleSubmit = async (values: { expenseName: string; expenseAmount: number }) => {
+    const response = await postApi('/v1/dailyexpense/add-expense', values);
+    if (response.status === 200) {
+        showToast(response.data.message, 'success');
+        setTimeout(() => {
+        }, 2000);
+    } else {
+        showToast(response.data.message || 'Add Expenses failed', 'error');
+    }
     onClose(); // Close the modal after saving
   };
 

@@ -19,10 +19,6 @@ routes.push(  {
   title: 'DSR-Invoice',
   path: '/dsr-invoice',
   icon:  icon('ic-dsrinvoice'), 
-},{
-  title: 'User',
-  path: '/user',
-  icon: icon('ic-user'),
 })
   }
   if(role === 'ADMIN'){

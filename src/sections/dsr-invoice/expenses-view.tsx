@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import  {getApi}  from "src/service/api";
 import {
   Button,
   Typography,
@@ -17,11 +18,12 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ExpenseForm from "./expenses-form";
 
+
 type Expense = {
   id: number;
-  name: string;
-  amount: number;
-  date: string; // Format: YYYY-MM-DD
+  expenseName: string;
+  expenseAmount: number;
+  createdAt: string; // Format: YYYY-MM-DD
 };
 
 type ExpensesViewProps = {
@@ -30,17 +32,21 @@ type ExpensesViewProps = {
 };
 
 const ExpensesView: React.FC<ExpensesViewProps> = ({ expensesDataView, handleBack }) => {
-  const [expenses, setExpenses] = useState<Expense[]>([
-    { id: 1, name: "Office Supplies", amount: 120, date: "2024-11-01" },
-    { id: 2, name: "Travel", amount: 250, date: "2024-11-05" },
-    { id: 3, name: "Snacks", amount: 75, date: "2024-11-10" },
-  ]);
-  const [filteredExpenses, setFilteredExpenses] = useState<Expense[]>(expenses);
+  const [expenses, setExpenses] = useState<any[]>([ ]);
+  const [filteredExpenses, setFilteredExpenses] = useState<any[]>([]);
   const [openModal, setOpenModal] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  useEffect(() => {
+    setFilteredExpenses(expenses); 
+  }, [expenses]);
+
+  useEffect(() => {
+    getAllExpenses();
+  }, []);
 
   // Open and close modal handlers
   const handleOpenModal = () => setOpenModal(true);
@@ -60,6 +66,7 @@ const ExpensesView: React.FC<ExpensesViewProps> = ({ expensesDataView, handleBac
     setFilteredExpenses(filtered);
   };
 
+
   // Reset filters
   const handleClear = () => {
     setStartDate("");
@@ -73,6 +80,20 @@ const ExpensesView: React.FC<ExpensesViewProps> = ({ expensesDataView, handleBac
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+
+  const getAllExpenses = async () => {
+    try {
+      const response = await getApi('/v1/dailyexpense/daily-expense');
+      setExpenses(response.data.data);
+    } catch (error) {
+      console.error('Error fetching data:', error); // Handle any error
+    }
+  };
+
+
+  console.log('Expenses:', expenses);
+console.log('Filtered Expenses:', filteredExpenses);
+
 
   return (
     <div>
@@ -127,12 +148,12 @@ const ExpensesView: React.FC<ExpensesViewProps> = ({ expensesDataView, handleBac
           <TableBody>
             {filteredExpenses
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((expense) => (
+              .map((expense, index) => (
                 <TableRow key={expense.id}>
-                  <TableCell>{expense.id}</TableCell>
-                  <TableCell>{expense.name}</TableCell>
-                  <TableCell>${expense.amount}</TableCell>
-                  <TableCell>{expense.date}</TableCell>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{expense.expenseName}</TableCell>
+                  <TableCell>${expense.expenseAmount}</TableCell>
+                  <TableCell>{expense.createdAt}</TableCell>
                 </TableRow>
               ))}
           </TableBody>
