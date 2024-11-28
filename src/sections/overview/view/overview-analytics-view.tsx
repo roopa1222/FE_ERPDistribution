@@ -125,7 +125,7 @@ export function OverviewAnalyticsView() {
                 <Typography variant="h4" color="primary">
                   {dashboardData.accessoriesCount}
                 </Typography>
-                <Typography variant="subtitle1">Total Accesseries count</Typography>
+                <Typography variant="subtitle1">Total Accessories count</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -158,7 +158,7 @@ export function OverviewAnalyticsView() {
               title="Current Data"
               chart={{
                 series: [
-                  { label: 'Accesseries count', value: dashboardData.accessoriesCount || 0 },
+                  { label: 'Accessories count', value: dashboardData.accessoriesCount || 0 },
                   { label: 'Mobile Count', value: dashboardData.mobileCount || 0 },
                   { label: 'Electronic Count', value: dashboardData.electronicCount || 0 },
                 ],
