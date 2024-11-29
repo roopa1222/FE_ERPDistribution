@@ -188,7 +188,7 @@ export function DsrInvoiceView() {
   // Export to Excel (stub function)
   const handleDsrInvoiceExcel = async () => {
     const response = await getApi(
-      `/v1/dsrInvoice/dsr-invoice-excel-data?branchId=${selectedBranchId}&from=${startDate}&to=${endDate}`
+      `/v1/dsrInvoice/dsr-invoice-excel-data?branchId=${selectedBranchId}&startDate=${startDate}&endDate=${endDate}`
     );
   };
 
