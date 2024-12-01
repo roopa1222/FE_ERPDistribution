@@ -507,6 +507,7 @@ if(debouncedValue){
                         <TableCell>Sr.No</TableCell>
                         <TableCell>Product Name</TableCell>
                         <TableCell>Category</TableCell>
+                       { !roleWiseAccess && <TableCell>Branch Name</TableCell>}
                         <TableCell>Customer Details</TableCell>
                         <TableCell>Payment Mode</TableCell>
                         <TableCell>Payment Details</TableCell>
@@ -516,174 +517,150 @@ if(debouncedValue){
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {invoiceData && invoiceData.length > 0 ? (
-                        invoiceData.map((row, index) => (
-                          <TableRow key={row._id}>
-                            <TableCell>{index + 1}</TableCell>
-                            <TableCell>{row.productName}</TableCell>
-                            <TableCell>{row.category}</TableCell>
-                            <TableCell
-                              sx={{
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                              }}
-                            >
-                              <IconButton onClick={(e) => handleClick(e, row)}>
-                                <PersonIcon />
-                              </IconButton>
-                              <Popover
-                                id={id}
-                                open={open}
-                                anchorEl={anchorEl}
-                                onClose={handleClose}
-                                anchorOrigin={{
-                                  vertical: 'bottom',
-                                  horizontal: 'left',
-                                }}
+      {invoiceData && invoiceData.length > 0 ? (
+        invoiceData.map((row, index) => {
+          // Calculate serial number
+          const serialNumber = page * rowsPerPage + index + 1;
+          return (
+            <TableRow key={row._id}>
+              <TableCell>{serialNumber}</TableCell> {/* Updated Serial Number Calculation */}
+              <TableCell>{row.productName}</TableCell>
+              <TableCell>{row.category}</TableCell>
+              { !roleWiseAccess &&
+              <TableCell>{row.branchName}</TableCell>
+              }
+              <TableCell
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <IconButton onClick={(e) => handleClick(e, row)}>
+                  <PersonIcon />
+                </IconButton>
+                <Popover
+                  id={id}
+                  open={open}
+                  anchorEl={anchorEl}
+                  onClose={handleClose}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                  }}
+                >
+                  <Typography sx={{ p: 2 }}>
+                    <Typography
+                      variant="caption"
+                      component="span"
+                      sx={{ fontWeight: 'bold' }}
+                    >
+                      Customer Name :
+                    </Typography>{' '}
+                    {customerName || 'NA'}
+                    <br />
+                    <Typography
+                      variant="caption"
+                      component="span"
+                      sx={{ fontWeight: 'bold' }}
+                    >
+                      Customer Mobile :
+                    </Typography>{' '}
+                    {customerMobileNo || 'NA'}
+                  </Typography>
+                </Popover>
+              </TableCell>
+              <TableCell>
+                {Array.isArray(row.paymentMode)
+                  ? row.paymentMode.join(', ')
+                  : row.paymentMode}
+              </TableCell>
+              <TableCell
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <IconButton onClick={(e) => handlePaymentClick(e, row)}>
+                  <VisibilityIcon />
+                </IconButton>
+                <Popover
+                  id={id}
+                  open={openPaymentPopover}
+                  anchorEl={paymentAnchorEl}
+                  onClose={handleClose}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                  }}
+                >
+                  <Typography sx={{ p: 2 }}>
+                    {paymentData &&
+                      paymentData.map(
+                        (detail: PaymentDetail) =>
+                          detail.mode !== '2Finance' &&
+                          detail.mode !== '1Finance' && (
+                            <div key={detail.mode}>
+                              <Typography
+                                variant="caption"
+                                component="span"
+                                sx={{ fontWeight: 'bold' }}
                               >
-                                <Typography sx={{ p: 2 }}>
-                                  <Typography
-                                    variant="caption"
-                                    component="span"
-                                    sx={{ fontWeight: 'bold' }}
-                                  >
-                                    Customer Name :
-                                  </Typography>{' '}
-                                  {customerName || 'NA'}
-                                  <br />
-                                  <Typography
-                                    variant="caption"
-                                    component="span"
-                                    sx={{ fontWeight: 'bold' }}
-                                  >
-                                    Customer Mobile :
-                                  </Typography>{' '}
-                                  {customerMobileNo || 'NA'}
-                                </Typography>
-                              </Popover>
-                            </TableCell>
-                            <TableCell>
-                              {Array.isArray(row.paymentMode)
-                                ? row.paymentMode.join(', ')
-                                : row.paymentMode}
-                            </TableCell>
-                            <TableCell
-                              sx={{
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                              }}
-                            >
-                              <IconButton onClick={(e) => handlePaymentClick(e, row)}>
-                                <VisibilityIcon />
-                              </IconButton>
-                              <Popover
-                                id={id}
-                                open={openPaymentPopover}
-                                anchorEl={paymentAnchorEl}
-                                onClose={handleClose}
-                                anchorOrigin={{
-                                  vertical: 'bottom',
-                                  horizontal: 'left',
-                                }}
-                              >
-                                <Typography sx={{ p: 2 }}>
-                                  {paymentData &&
-                                    paymentData.map(
-                                      (detail: PaymentDetail) =>
-                                        detail.mode !== '2Finance' &&
-                                        detail.mode !== '1Finance' && (
-                                          <div key={detail.mode}>
-                                            <Typography
-                                              variant="caption"
-                                              component="span"
-                                              sx={{ fontWeight: 'bold' }}
-                                            >
-                                              {detail.mode} =
-                                            </Typography>{' '}
-                                            <CurrencyRupee
-                                              fontSize="small"
-                                              style={{ fontSize: '0.8rem' }}
-                                            />{' '}
-                                            {detail.amount}
-                                          </div>
-                                        )
-                                    )}
-
-                                  {financeData &&
-                                    financeData.map((detail: FinanceDetail) => (
-                                      <div>
-                                        <Typography
-                                          variant="caption"
-                                          component="span"
-                                          sx={{ fontWeight: 'bold' }}
-                                        >
-                                          {detail.financeName} =
-                                        </Typography>{' '}
-                                        <CurrencyRupee
-                                          fontSize="small"
-                                          style={{ fontSize: '0.8rem' }}
-                                        />{' '}
-                                        {detail.amount}
-                                      </div>
-                                    ))}
-                                </Typography>
-                              </Popover>
-                            </TableCell>
-
-                            <TableCell>
-                              <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <CurrencyRupee
-                                  fontSize="small"
-                                  style={{ fontSize: '1rem', marginRight: '4px' }}
-                                />
-                                {row.totalAmount}
-                              </div>
-                            </TableCell>
-
-                            <TableCell>{row.createdAt}</TableCell>
-                            {/* <TableCell>
-                              <IconButton
-                                aria-label="more"
-                                aria-controls={`menu-${row.id}`}
-                                aria-haspopup="true" */}
-                                {/* // onClick={(e) => handleClick(e, row.id)} */}
-                              {/* // > */}
-                                {/* <Menu
-          anchorEl={anchorEl}
-          id={`menu-${row.id}`}
-          // open={Boolean(anchorEl && selectedId === row.id)}
-          onClose={handleClose}
-          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        >
-          <MenuItem >
-            <ListItemIcon>
-              <EditIcon fontSize="small" />
-            </ListItemIcon>
-            Edit
-          </MenuItem>
-          <MenuItem onClick={() => handleDelete(row.id)}>
-            <ListItemIcon>
-              <DeleteIcon fontSize="small" />
-            </ListItemIcon>
-            Delete
-          </MenuItem>
-        </Menu> */}
-                                {/* <MoreVertIcon />
-                              </IconButton>
-                            </TableCell> */}
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={6} align="center">
-                            No Data Found!
-                          </TableCell>
-                        </TableRow>
+                                {detail.mode} =
+                              </Typography>{' '}
+                              <CurrencyRupee
+                                fontSize="small"
+                                style={{ fontSize: '0.8rem' }}
+                              />{' '}
+                              {detail.amount}
+                            </div>
+                          )
                       )}
-                    </TableBody>
+
+                    {financeData &&
+                      financeData.map((detail: FinanceDetail) => (
+                        <div key={detail.financeName}>
+                          <Typography
+                            variant="caption"
+                            component="span"
+                            sx={{ fontWeight: 'bold' }}
+                          >
+                            {detail.financeName} =
+                          </Typography>{' '}
+                          <CurrencyRupee
+                            fontSize="small"
+                            style={{ fontSize: '0.8rem' }}
+                          />{' '}
+                          {detail.amount}
+                        </div>
+                      ))}
+                  </Typography>
+                </Popover>
+              </TableCell>
+
+              <TableCell>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <CurrencyRupee
+                    fontSize="small"
+                    style={{ fontSize: '1rem', marginRight: '4px' }}
+                  />
+                  {row.totalAmount}
+                </div>
+              </TableCell>
+
+              <TableCell>{row.createdAt}</TableCell>
+            </TableRow>
+          );
+        })
+      ) : (
+        <TableRow>
+          <TableCell colSpan={6} align="center">
+            No Data Found!
+          </TableCell>
+        </TableRow>
+      )}
+    </TableBody>
                   </Table>
                 </TableContainer>
 
