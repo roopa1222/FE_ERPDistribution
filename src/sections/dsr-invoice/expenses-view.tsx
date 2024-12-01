@@ -92,11 +92,6 @@ const ExpensesView: React.FC<ExpensesViewProps> = ({ expensesDataView, handleBac
     }
   };
 
-
-  console.log('Expenses:', expenses);
-console.log('Filtered Expenses:', filteredExpenses);
-
-
   return (
     <div>
       {/* Header */}
@@ -107,9 +102,6 @@ console.log('Filtered Expenses:', filteredExpenses);
         <Typography variant="h4" flexGrow={1} textAlign="center">
           Expenses
         </Typography>
-        <Button variant="contained" color="inherit" onClick={handleOpenModal}>
-          Add Expenses
-        </Button>
       </Box>
 
       {/* Filters */}
@@ -172,25 +164,6 @@ console.log('Filtered Expenses:', filteredExpenses);
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
-
-      {/* Modal */}
-      <Modal open={openModal} onClose={handleCloseModal}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
-            borderRadius: 2,
-            boxShadow: 24,
-            p: 4,
-          }}
-        >
-          <ExpenseForm onClose={handleCloseModal} getAllExpenses={getAllExpenses} />
-        </Box>
-      </Modal>
     </div>
   );
 };

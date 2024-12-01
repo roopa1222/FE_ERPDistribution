@@ -7,10 +7,9 @@ import { postApi } from "src/service/api";
 
 type ExpenseFormProps = {
   onClose: () => void;
-  getAllExpenses:() =>void;
 };
 
-const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, getAllExpenses }) => {
+const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose }) => {
   const { showToast } = useContext(ToastContext);
 
   // Validation Schema
@@ -26,7 +25,6 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose, getAllExpenses }) =>
     const response = await postApi('/v1/dailyexpense/add-expense', values);
     if (response.status === 200) {
         showToast(response.data.message, 'success');
-        getAllExpenses();
         setTimeout(() => {
         }, 1000);
     } else {
