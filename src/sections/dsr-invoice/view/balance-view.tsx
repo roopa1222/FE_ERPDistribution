@@ -103,10 +103,6 @@ const BalanceView: React.FC<BalanceViewProps> = ({ balanceDataView, handleBack }
         <Typography variant="h4" flexGrow={1} textAlign="center">
           Balances
         </Typography>
-
-        <Button variant="contained" color="inherit" onClick={handleOpenModal}>
-          Add Balance
-        </Button>
       </Box>
 
       {/* Filters */}
@@ -169,25 +165,6 @@ const BalanceView: React.FC<BalanceViewProps> = ({ balanceDataView, handleBack }
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
-
-      {/* Modal */}
-      <Modal open={openModal} onClose={handleCloseModal}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
-            borderRadius: 2,
-            boxShadow: 24,
-            p: 4,
-          }}
-        >
-          <BalanceForm onClose={handleCloseModal} /> {/* Render BalanceForm */}
-        </Box>
-      </Modal>
     </div>
   );
 };

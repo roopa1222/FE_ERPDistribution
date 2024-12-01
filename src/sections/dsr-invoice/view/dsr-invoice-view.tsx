@@ -1,5 +1,5 @@
 import type { SelectChangeEvent } from '@mui/material';
-
+import axios from 'axios';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import {
   Table,
@@ -15,6 +15,9 @@ import {
   Autocomplete,
   TableContainer,
   TablePagination,
+  Avatar,
+  Modal,
+  InputAdornment,
 } from '@mui/material'; // Back icon
 
 import { useState, useEffect, useCallback } from 'react';
@@ -28,12 +31,18 @@ import CurrencyRupee from '@mui/icons-material/CurrencyRupee';
 
 import { getApi } from 'src/service/api';
 import { DashboardContent } from 'src/layouts/dashboard';
-
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import Divider from '@mui/material/Divider';
 import { Iconify } from 'src/components/iconify';
-
+import {AttachMoney,Receipt,AccountBalance} from '@mui/icons-material';
+import SearchIcon from '@mui/icons-material/Search';
 import BalanceView from './balance-view';
 import ExpensesView from '../expenses-view';
 import DsrAddInvoiceView from '../add-dsr-invoice';
+import ExpenseForm from '../expenses-form';
+import BalanceForm from './balance-form';
 
 interface Branch {
   _id: string;
@@ -82,6 +91,12 @@ export function DsrInvoiceView() {
   const [paymentData, setPaymentData] = useState<PaymentDetail[]>([]);
   const [financeData, setFinanceData] = useState<FinanceDetail[]>([]);
   const [paymentAnchorEl, setPaymentAnchorEl] = useState<HTMLElement | null>(null);
+  const [openExpenseModal, setOpenExpenseModal] = useState(false);
+  const [anchorElAdd, setAnchorElAdd] = useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [openBalanceModal, setOpenBalanceModal] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
+  const [debouncedValue, setDebouncedValue] = useState('');
 
   // Function to handle the opening of the payment details popover
   const handlePaymentClick = (event: React.MouseEvent<HTMLElement>, row: InvoiceRow) => {
@@ -90,10 +105,10 @@ export function DsrInvoiceView() {
     setFinanceData(row.financeDetails);
   };
   const getInvoiceData = useCallback(
-    async (from: string, to: string, limit: number, offset: number) => {
+    async (debounceValue:string,from: string, to: string, limit: number, offset: number) => {
       try {
         const response = await getApi(
-          `/v1/dsrInvoice/dsr-invoice?branchId=${selectedBranchId}&startDate=${from}&endDate=${to}&limit=${limit}&offset=${offset}`
+          `/v1/dsrInvoice/dsr-invoice?branchId=${selectedBranchId}&searchValue=${debounceValue}&startDate=${from}&endDate=${to}&limit=${limit}&offset=${offset}`
         );
         // Handle the response as needed
         if (response.data) {
@@ -117,8 +132,26 @@ export function DsrInvoiceView() {
     } else {
       getBrachData();
     }
-    getInvoiceData('', '', 5, 0);
-  }, [getInvoiceData]);
+if(debouncedValue){
+  
+  getInvoiceData(debouncedValue,'', '', 5, 0);
+}else{
+
+  getInvoiceData('','', '', 5, 0);
+}
+  }, [getInvoiceData,debouncedValue]);
+
+  useEffect(() => {
+
+    const handler = setTimeout(() => {
+      setDebouncedValue(searchValue);
+    }, 700);
+
+    return () => {
+      clearTimeout(handler); // Clear timeout on value change
+    };
+  }, [searchValue]);
+
 
   const getBrachData = async () => {
     const response = await getApi('/v1/branch/all-branches');
@@ -139,7 +172,7 @@ export function DsrInvoiceView() {
 
   const handleBack = () => {
     setAddView(false);
-    getInvoiceData('', '', 5, 0);
+    getInvoiceData(debouncedValue,'', '', 5, 0);
     setStartDate('');
     setEndDate('');
   };
@@ -164,19 +197,19 @@ export function DsrInvoiceView() {
   // Handle pagination
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
-    getInvoiceData(startDate, endDate, rowsPerPage, newPage * rowsPerPage);
+    getInvoiceData(debouncedValue,startDate, endDate, rowsPerPage, newPage * rowsPerPage);
   };
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newRowsPerPage = parseInt(event.target.value, 10);
     setRowsPerPage(newRowsPerPage);
     setPage(0); // Reset to the first page when the rows per page changes
-    getInvoiceData(startDate, endDate, newRowsPerPage, 0);
+    getInvoiceData(debouncedValue,startDate, endDate, newRowsPerPage, 0);
   };
 
   // Apply filtering when the user clicks "Search"
   const handleSearch = () => {
-    getInvoiceData(startDate, endDate, rowsPerPage, 0);
+    getInvoiceData(debouncedValue,startDate, endDate, rowsPerPage, 0);
   };
 
   // Reset filters and inputs
@@ -185,15 +218,32 @@ export function DsrInvoiceView() {
     setEndDate('');
   };
 
-  // Export to Excel (stub function)
   const handleDsrInvoiceExcel = async () => {
-    const response = await getApi(
-      `/v1/dsrInvoice/dsr-invoice-excel-data?branchId=${selectedBranchId}&startDate=${startDate}&endDate=${endDate}`
-    );
+    try {
+      const token = localStorage.getItem('token') || '';
+      const response = await axios.get(
+        `http://localhost:3002/v1/dsrInvoice/dsr-invoice-excel-data?branchId=${selectedBranchId}&startDate=${startDate}&endDate=${endDate}`,
+        { responseType: 'blob' ,
+          headers: {
+            Authorization: `Bearer ${token}`, 
+          },
+        } // Ensures the response is treated as binary data
+      );
+  
+      const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `DsrInvoice_${startDate}_to_${endDate}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
   };
-
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-
+  
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>, row: InvoiceRow) => {
     setAnchorEl(event.currentTarget);
     setCustomerName(row.customerName || 'NA');
@@ -205,12 +255,26 @@ export function DsrInvoiceView() {
     setCustomerName('');
     setCustomerMobileNo(' ');
     setPaymentAnchorEl(null);
+    setAnchorElAdd(null);
   };
+
+  const opens = Boolean(anchorElAdd);
+  const handleClickAdd = (event: React.MouseEvent<HTMLElement>) => {
+    
+    setAnchorElAdd(event.currentTarget);
+  };
+  
+  const handleOpenExpenseModal = () => setOpenExpenseModal(true);
+  const handleCloseExpenseModal = () => setOpenExpenseModal(false);
+
+  const handleOpenBalanceModal = () => setOpenBalanceModal(true);
+  const handleCloseBalanceModal = () => setOpenBalanceModal(false);
 
   const openPaymentPopover = Boolean(paymentAnchorEl);
 
   const open = Boolean(anchorEl);
   const id = open ? 'simple-popover' : undefined;
+
   return (
     <DashboardContent>
       {!expensesView && !balanceView && !addView && (
@@ -219,7 +283,7 @@ export function DsrInvoiceView() {
             DSR-INVOICE
           </Typography>
           <Button
-            variant="contained"
+            variant="outlined"
             color="inherit"
             startIcon={<Iconify icon="mingcute:eye-line" />}
             onClick={handleBalance}
@@ -227,7 +291,7 @@ export function DsrInvoiceView() {
             Balances
           </Button>
           <Button
-            variant="contained"
+            variant="outlined"
             color="inherit"
             startIcon={<Iconify icon="mingcute:eye-line" />}
             onClick={handleExpenses}
@@ -239,10 +303,78 @@ export function DsrInvoiceView() {
             variant="contained"
             color="inherit"
             startIcon={<Iconify icon="mingcute:add-line" />}
-            onClick={handleAddInvoice}
+            // onClick={handleAddInvoice}
+            onClick={handleClickAdd}
+            aria-controls={opens ? 'account-menu' : undefined}
+            aria-haspopup="true"
+            aria-expanded={opens ? 'true' : undefined}
           >
-            Add Invoice
+            Add
           </Button>
+          <Menu
+        anchorEl={anchorElAdd}
+        id="account-menu"
+        open={opens}
+        onClose={handleClose}
+        onClick={handleClose}
+        slotProps={{
+          paper: {
+            elevation: 0,
+            sx: {
+              overflow: 'visible',
+              filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+              mt: 1.5,
+              '& .MuiAvatar-root': {
+                width: 32,
+                height: 32,
+                ml: -0.5,
+                mr: 1,
+              },
+              '&::before': {
+                content: '""',
+                display: 'block',
+                position: 'absolute',
+                top: 0,
+                right: 14,
+                width: 10,
+                height: 10,
+                bgcolor: 'background.paper',
+                transform: 'translateY(-50%) rotate(45deg)',
+                zIndex: 0,
+              },
+            },
+          },
+        }}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      >
+        {/* <MenuItem onClick={handleClose}>
+          <Avatar /> Profile
+        </MenuItem>
+        <MenuItem onClick={handleClose}>
+          <Avatar /> My account
+        </MenuItem>
+        <Divider /> */}
+        <MenuItem onClick={handleAddInvoice}>
+          <ListItemIcon>
+            <Receipt fontSize="small" />
+          </ListItemIcon>
+           Invoice
+        </MenuItem>
+        <MenuItem onClick={handleOpenBalanceModal}>
+          <ListItemIcon>
+            <AccountBalance fontSize="small" />
+          </ListItemIcon>
+           Balance
+        </MenuItem>
+        <MenuItem onClick={handleOpenExpenseModal}>
+          <ListItemIcon>
+            <AttachMoney fontSize="small" />
+          </ListItemIcon>
+           Expense
+        </MenuItem>
+      </Menu>
+    
         </Box>
       )}
 
@@ -271,11 +403,33 @@ export function DsrInvoiceView() {
             <Typography variant="body1">
               <Box p={3}>
                 {/* Toolbar */}
-                <Box display="flex" flexDirection="row" justifyContent="flex-end" mb={2}>
-                  <Button variant="contained" color="inherit" onClick={handleDsrInvoiceExcel}>
-                    Export to Excel
-                  </Button>
-                </Box>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+  {/* Search Input Box with Search Icon */}
+  <Box display="flex" alignItems="center" sx={{ flex: 1, maxWidth: '470px' }}>
+    <TextField
+      label="Search"
+      variant="outlined"
+      size="small"
+      value={searchValue}
+      onChange={(e) => setSearchValue(e.target.value)}
+      placeholder="Search products, categories, or payment options..."
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <SearchIcon />
+          </InputAdornment>
+        ),
+      }}
+      fullWidth
+    />
+  </Box>
+
+  {/* Export to Excel Button */}
+  <Button variant="contained" color="inherit" onClick={handleDsrInvoiceExcel}>
+    Export to Excel
+  </Button>
+</Box>
+
                 <Box display="flex" flexDirection="column" gap={2} mb={3}>
                   {/* Filters */}
                   <Box display="flex" gap={2} flexWrap="wrap" alignItems="center">
@@ -358,7 +512,7 @@ export function DsrInvoiceView() {
                         <TableCell>Payment Details</TableCell>
                         <TableCell>Amount</TableCell>
                         <TableCell>Date</TableCell>
-                        <TableCell>Action</TableCell>
+                        {/* <TableCell>Action</TableCell> */}
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -489,13 +643,13 @@ export function DsrInvoiceView() {
                             </TableCell>
 
                             <TableCell>{row.createdAt}</TableCell>
-                            <TableCell>
+                            {/* <TableCell>
                               <IconButton
                                 aria-label="more"
                                 aria-controls={`menu-${row.id}`}
-                                aria-haspopup="true"
-                                // onClick={(e) => handleClick(e, row.id)}
-                              >
+                                aria-haspopup="true" */}
+                                {/* // onClick={(e) => handleClick(e, row.id)} */}
+                              {/* // > */}
                                 {/* <Menu
           anchorEl={anchorEl}
           id={`menu-${row.id}`}
@@ -517,9 +671,9 @@ export function DsrInvoiceView() {
             Delete
           </MenuItem>
         </Menu> */}
-                                <MoreVertIcon />
+                                {/* <MoreVertIcon />
                               </IconButton>
-                            </TableCell>
+                            </TableCell> */}
                           </TableRow>
                         ))
                       ) : (
@@ -556,6 +710,44 @@ export function DsrInvoiceView() {
       {balanceView && !addView && !expensesView && (
         <BalanceView balanceDataView={balanceView} handleBack={() => setBalanceView(false)} />
       )}
+
+       {/* Expense Modal */}
+       <Modal open={openExpenseModal} onClose={handleCloseExpenseModal}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <ExpenseForm onClose={handleCloseExpenseModal} />
+        </Box>
+      </Modal>
+
+      {/* Balance Modal  */}
+      <Modal open={openBalanceModal} onClose={handleCloseBalanceModal}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <BalanceForm onClose={handleCloseBalanceModal} /> {/* Render BalanceForm */}
+        </Box>
+      </Modal>
     </DashboardContent>
   );
 }
