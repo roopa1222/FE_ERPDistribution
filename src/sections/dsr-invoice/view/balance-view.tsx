@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Typography,
@@ -14,8 +14,10 @@ import {
   TableRow,
   TablePagination,
 } from "@mui/material";
+import { getApi } from "src/service/api";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import BalanceForm from "./balance-form"; // Import BalanceForm
+
 
 type Balance = {
   id: number;
@@ -30,12 +32,8 @@ type BalanceViewProps = {
 };
 
 const BalanceView: React.FC<BalanceViewProps> = ({ balanceDataView, handleBack }) => {
-  const [balances, setBalances] = useState<Balance[]>([
-    { id: 1, openingBalance: 1000, closingBalance: 1500, date: "2024-11-01" },
-    { id: 2, openingBalance: 1500, closingBalance: 2000, date: "2024-11-05" },
-    { id: 3, openingBalance: 2000, closingBalance: 2500, date: "2024-11-10" },
-  ]);
-  const [filteredBalances, setFilteredBalances] = useState<Balance[]>(balances);
+  const [balances, setBalances] = useState<any[]>([]);
+  const [filteredBalances, setFilteredBalances] = useState<any[]>(balances);
   const [openModal, setOpenModal] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -45,6 +43,10 @@ const BalanceView: React.FC<BalanceViewProps> = ({ balanceDataView, handleBack }
   // Open and close modal handlers
   const handleOpenModal = () => setOpenModal(true);
   const handleCloseModal = () => setOpenModal(false);
+
+  useEffect(() => {
+    getAllBalance();
+  }, []);
 
   // Filter balances by date range
   const handleSearch = () => {
@@ -73,6 +75,22 @@ const BalanceView: React.FC<BalanceViewProps> = ({ balanceDataView, handleBack }
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+
+  const getAllBalance = async () => {
+    try {
+      const response = await getApi('/v1/dailyexpense/opening-closing-balance');
+      console.log('responseBalance====>>>>>',response )
+      setBalances(response.data.data);
+    } catch (error) {
+      console.error('Error fetching data:', error); // Handle any error
+    }
+  };
+
+  useEffect(() => {
+  setFilteredBalances(balances);
+}, [balances]);
+
+  console.log('filteredBalances====>>>>>',filteredBalances )
 
   return (
     <div>
@@ -129,12 +147,12 @@ const BalanceView: React.FC<BalanceViewProps> = ({ balanceDataView, handleBack }
           <TableBody>
             {filteredBalances
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((balance) => (
+              .map((balance, index) => (
                 <TableRow key={balance.id}>
-                  <TableCell>{balance.id}</TableCell>
+                  <TableCell>{index + balance.id}</TableCell>
                   <TableCell>{balance.openingBalance}</TableCell>
                   <TableCell>{balance.closingBalance}</TableCell>
-                  <TableCell>{balance.date}</TableCell>
+                  <TableCell>{balance.createdAt}</TableCell>
                 </TableRow>
               ))}
           </TableBody>

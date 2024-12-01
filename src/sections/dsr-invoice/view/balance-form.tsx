@@ -1,13 +1,16 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { Button, TextField, Box, Typography } from "@mui/material";
+import { ToastContext } from "src/components/toaster/toastProvider";
+import { postApi } from "src/service/api";
 
 type BalanceFormProps = {
   onClose: () => void;
 };
 
 const BalanceForm: React.FC<BalanceFormProps> = ({ onClose }) => {
+  const { showToast } = useContext(ToastContext);
   // Validation Schema
   const validationSchema = Yup.object({
     openingBalance: Yup.number()
@@ -21,8 +24,15 @@ const BalanceForm: React.FC<BalanceFormProps> = ({ onClose }) => {
   });
 
   // Form Submission
-  const handleSubmit = (values: { openingBalance: number; closingBalance: number }) => {
-    console.log("Balance Data:", values);
+  const handleSubmit = async (values: { openingBalance: number; closingBalance: number }) => {
+    const response = await postApi('/v1/dailyexpense/add-expense', values);
+    if (response.status === 200) {
+        showToast(response.data.message, 'success');
+        setTimeout(() => {
+        }, 2000);
+    } else {
+        showToast(response.data.message || 'Add Expenses failed', 'error');
+    }
     onClose(); // Close the modal after saving
   };
 
