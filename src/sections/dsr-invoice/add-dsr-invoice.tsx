@@ -2,7 +2,7 @@ import type { AlertColor } from '@mui/material/Alert';
 import type { SnackbarCloseReason } from '@mui/material/Snackbar';
 
 import * as Yup from 'yup';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Form, Field, Formik, ErrorMessage } from 'formik';
 
 import Alert from '@mui/material/Alert';
@@ -24,6 +24,7 @@ import {
 } from '@mui/material';
 
 import { getApi, postApi } from 'src/service/api';
+import { ToastContext } from 'src/components/toaster/toastProvider';
 
 const paymentOptions = [
   'UPI',
@@ -220,6 +221,8 @@ const DsrAddInvoiceView = () => {
               [] as { mode: string; amount: string }[]
             ), // Store payment mode and amount pairs
           };
+
+        console.log('Form Data on Submit:', formData);
 
           const response = await postApi('/v1/dsrInvoice/add-dsr-invoice', formData);
           if (response.status === 200) {

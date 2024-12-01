@@ -32,13 +32,15 @@ type ExpensesViewProps = {
 };
 
 const ExpensesView: React.FC<ExpensesViewProps> = ({ expensesDataView, handleBack }) => {
-  const [expenses, setExpenses] = useState<any[]>([ ]);
-  const [filteredExpenses, setFilteredExpenses] = useState<any[]>([]);
+  const [expenses, setExpenses] = useState<any[]>([]);
+  const [filteredExpenses, setFilteredExpenses] = useState<any[]>(expenses);
   const [openModal, setOpenModal] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+
+ 
 
   useEffect(() => {
     setFilteredExpenses(expenses); 
@@ -152,7 +154,7 @@ console.log('Filtered Expenses:', filteredExpenses);
                 <TableRow key={expense.id}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>{expense.expenseName}</TableCell>
-                  <TableCell>${expense.expenseAmount}</TableCell>
+                  <TableCell>{expense.expenseAmount}</TableCell>
                   <TableCell>{expense.createdAt}</TableCell>
                 </TableRow>
               ))}
@@ -186,7 +188,7 @@ console.log('Filtered Expenses:', filteredExpenses);
             p: 4,
           }}
         >
-          <ExpenseForm onClose={handleCloseModal} />
+          <ExpenseForm onClose={handleCloseModal} getAllExpenses={getAllExpenses} />
         </Box>
       </Modal>
     </div>
