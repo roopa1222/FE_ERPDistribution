@@ -2,7 +2,8 @@ import { Helmet } from 'react-helmet-async';
 
 import { CONFIG } from 'src/config-global';
 
-import { ProductsView } from 'src/sections/product/view';
+// import { ProductsView } from 'src/sections/product/view';
+import { ProductView } from 'src/sections/products/view';
 
 // ----------------------------------------------------------------------
 
@@ -13,7 +14,7 @@ export default function Page() {
         <title> {`Products - ${CONFIG.appName}`}</title>
       </Helmet>
 
-      <ProductsView />
+      <ProductView />
     </>
   );
 }
