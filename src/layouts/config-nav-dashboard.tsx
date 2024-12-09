@@ -1,4 +1,6 @@
-import { SvgColor } from 'src/components/svg-color';
+import DescriptionIcon from '@mui/icons-material/Description';
+
+import { SvgColor } from 'src/components/svg-color'; // Importing the icon
 
 // ----------------------------------------------------------------------
 
@@ -20,7 +22,7 @@ if (role === 'SALESMAN') {
   routes.push({
     title: 'DSR-Invoice',
     path: '/dsr-invoice',
-    icon: icon('ic-dsrinvoice'),
+    icon: <DescriptionIcon />,
   });
 }
 if (role === 'ADMIN') {
@@ -38,7 +40,7 @@ if (role === 'ADMIN') {
     {
       title: 'DSR-Invoice',
       path: '/dsr-invoice',
-      icon: icon('ic-dsrinvoice'),
+      icon: <DescriptionIcon />,
     },
     {
       title: 'Product',
@@ -62,7 +64,7 @@ if (role === 'SUPER_ADMIN') {
     {
       title: 'DSR-Invoice',
       path: '/dsr-invoice',
-      icon: icon('ic-dsrinvoice'),
+      icon: <DescriptionIcon />,
     },
     {
       title: 'Product',
