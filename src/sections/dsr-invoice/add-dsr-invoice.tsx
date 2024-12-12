@@ -2,7 +2,7 @@ import type { AlertColor } from '@mui/material/Alert';
 import type { SnackbarCloseReason } from '@mui/material/Snackbar';
 
 import * as Yup from 'yup';
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Field, Formik, ErrorMessage } from 'formik';
 
 import Alert from '@mui/material/Alert';
@@ -23,8 +23,7 @@ import {
   OutlinedInput,
 } from '@mui/material';
 
-import { getApi, postApi } from 'src/service/api';
-import { ToastContext } from 'src/components/toaster/toastProvider';
+import { getApi, putApi, postApi } from 'src/service/api';
 
 const paymentOptions = [
   'UPI',
@@ -42,6 +41,16 @@ const category = ['MOBILE', 'ELECTRONICS', 'ACCESSORIES'];
 interface Branch {
   _id: string;
   branchName: string;
+}
+
+interface PaymentDetail {
+  mode: string;
+  amount: number;
+}
+
+interface FinanceDetail {
+  financeName: string;
+  amount: number;
 }
 
 interface FormValues {
@@ -66,7 +75,12 @@ const RequiredLabel = ({ label }: { label: string }) => (
   </Typography>
 );
 
-const DsrAddInvoiceView = () => {
+interface DsrAddInvoiceViewProps {
+  dsrData: any; // Replace `any` with the appropriate type if known
+  onClose: () => void;
+}
+
+const DsrAddInvoiceView: React.FC<DsrAddInvoiceViewProps> = ({ dsrData, onClose }) => {
   const [paymentModes, setPaymentModes] = useState<string[]>([]); // Maintain payment modes state
   const [totalCalculatedAmount, setTotalCalculatedAmount] = useState(0);
   const [roleWiseAccess, setRoleWiseAccess] = useState(false);
@@ -163,27 +177,45 @@ const DsrAddInvoiceView = () => {
     <>
       <Formik<FormValues>
         initialValues={{
-          productName: '',
-          productCode: '',
-          firstFinanceName: '',
-          secondFinanceName: '',
-          paymentMode: [],
-          customerName: '',
-          customerMobileNo: '',
-          branchId: '',
-          category: '',
-          totalAmount: '',
+          productName: dsrData?.productName || '',
+          productCode: dsrData?.serialNo || '',
+          paymentMode: dsrData?.paymentMode || [],
+          customerName: dsrData?.customerName || '',
+          customerMobileNo: dsrData?.customerMobileNo || '',
+          branchId: dsrData?.branchId || '',
+          category: dsrData?.category || '',
+          totalAmount: dsrData?.totalAmount || '',
+          firstFinanceName: (() => {
+            const matchingFinance = dsrData?.financeDetails.find((finance: FinanceDetail) =>
+              dsrData?.paymentDetails?.some((detail: PaymentDetail) =>
+                detail.mode === '1Finance' ? detail.amount === finance.amount : ''
+              )
+            );
+            return matchingFinance ? matchingFinance.financeName : '';
+          })(),
+          secondFinanceName: (() => {
+            const matchingFinance = dsrData?.financeDetails.find((finance: FinanceDetail) =>
+              dsrData?.paymentDetails?.some((detail: PaymentDetail) =>
+                detail.mode === '2Finance' ? detail.amount === finance.amount : ''
+              )
+            );
+            return matchingFinance ? matchingFinance.financeName : '';
+          })(),
           ...paymentOptions.reduce(
-            (initialValues, mode) => {
-              initialValues[`${mode.toLowerCase()}Amount`] = ''; // Dynamic amounts initialization
-              return initialValues;
+            (acc, mode) => {
+              const paymentDetail = dsrData?.paymentDetails?.find(
+                (detail: PaymentDetail) => detail.mode === mode
+              ); // Explicitly type 'detail'
+              acc[`${mode.toLowerCase()}Amount`] = paymentDetail ? paymentDetail.amount : ''; // Initialize based on paymentDetails or default to ''
+              return acc;
             },
-            {} as Record<string, string>
+            {} as Record<string, string | number>
           ),
         }}
         validationSchema={validationSchema}
         onSubmit={async (values, { resetForm }) => {
           const formData = {
+            id: dsrData?._id,
             productName: values.productName,
             serialNo: values.productCode,
             paymentMode: values.paymentMode,
@@ -222,20 +254,35 @@ const DsrAddInvoiceView = () => {
             ), // Store payment mode and amount pairs
           };
 
-        console.log('Form Data on Submit:', formData);
+          const handleApiResponse = (
+            response: { status: number; data?: { message?: string } },
+            successMessage: string,
+            errorMessage: string
+          ) => {
+            if (response.status === 200) {
+              setSeverityLevel('success');
+              setMessage(successMessage);
+              handleClick();
+              resetForm();
+              setTotalCalculatedAmount(0); // Reset total calculated amount
+              setPaymentModes([]); // Reset selected payment modes
+              setTimeout(() => {
+                onClose();
+              }, 1000);
+            } else {
+              setSeverityLevel('error');
+              setMessage(errorMessage);
+              handleClick();
+            }
+          };
 
-          const response = await postApi('/v1/dsrInvoice/add-dsr-invoice', formData);
-          if (response.status === 200) {
-            setSeverityLevel('success');
-            setMessage(response.data.message);
-            handleClick();
-            resetForm();
-            setTotalCalculatedAmount(0); // Reset total calculated amount
-            setPaymentModes([]); // Reset selected payment modes
+          // Main logic
+          if (dsrData) {
+            const response = await putApi('/v1/dsrInvoice/edit-dsr-invoice', formData);
+            handleApiResponse(response, 'Update successful!', 'Failed to update!');
           } else {
-            setSeverityLevel('error');
-            setMessage(response.data.message);
-            handleClick();
+            const response = await postApi('/v1/dsrInvoice/add-dsr-invoice', formData);
+            handleApiResponse(response, 'Save successful!', 'Failed to save!');
           }
         }}
         validateOnChange={false} // Disable auto-validation on each change to prevent excessive revalidation
@@ -493,7 +540,7 @@ const DsrAddInvoiceView = () => {
                   variant="contained"
                   sx={{ alignSelf: 'center' }}
                 >
-                  Save
+                  {dsrData ? 'Update' : 'Save'}
                 </LoadingButton>
               </Box>
             </Form>
