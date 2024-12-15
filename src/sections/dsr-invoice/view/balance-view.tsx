@@ -79,7 +79,6 @@ const BalanceView: React.FC<BalanceViewProps> = ({ balanceDataView, handleBack }
   const getAllBalance = async () => {
     try {
       const response = await getApi('/v1/dailyexpense/opening-closing-balance');
-      console.log('responseBalance====>>>>>',response )
       setBalances(response.data.data);
     } catch (error) {
       console.error('Error fetching data:', error); // Handle any error
@@ -145,7 +144,7 @@ const BalanceView: React.FC<BalanceViewProps> = ({ balanceDataView, handleBack }
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((balance, index) => (
                 <TableRow key={balance.id}>
-                  <TableCell>{index + balance.id}</TableCell>
+                  <TableCell>{index + 1}</TableCell>
                   <TableCell>{balance.openingBalance}</TableCell>
                   <TableCell>{balance.closingBalance}</TableCell>
                   <TableCell>{balance.createdAt}</TableCell>

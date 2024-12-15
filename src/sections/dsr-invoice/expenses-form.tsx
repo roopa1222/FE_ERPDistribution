@@ -18,10 +18,11 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose }) => {
     expenseAmount: Yup.number()
       .required("Expense Amount is required")
       .min(0, "Amount must be greater than or equal to 0"),
+      // totalExpense: Yup.number().min(0, "Amount must be greater than or equal to 0"),
   });
 
   // Form Submission
-  const handleSubmit = async (values: { expenseName: string; expenseAmount: number }) => {
+  const handleSubmit = async (values: { expenseName: string; expenseAmount: number; expenseType:'expense' }) => {
     const response = await postApi('/v1/dailyexpense/add-expense', values);
     if (response.status === 200) {
         showToast(response.data.message, 'success');
@@ -35,7 +36,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose }) => {
 
   return (
     <Formik
-      initialValues={{ expenseName: "", expenseAmount: 0 }}
+      initialValues={{expenseName: "", expenseAmount: 0, expenseType:"expense" }}
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
@@ -44,6 +45,16 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onClose }) => {
             <Typography variant='h4' flexGrow={1}>
          Create Expenses
         </Typography>
+        {/* <Box mb={2}>
+            <Field
+              name="totalExpense"
+              as={TextField}
+              fullWidth
+              label="Total Expense"
+              error={touched.totalExpense && !!errors.totalExpense}
+              helperText={touched.totalExpense && errors.totalExpense}
+            />
+          </Box> */}
           <Box mb={2}>
             <Field
               name="expenseName"
