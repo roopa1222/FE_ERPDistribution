@@ -24,7 +24,7 @@ const BalanceForm: React.FC<BalanceFormProps> = ({ onClose }) => {
   });
 
   // Form Submission
-  const handleSubmit = async (values: { openingBalance: number; closingBalance: number }) => {
+  const handleSubmit = async (values: { openingBalance: number; closingBalance: number, expenseType:'Balance'}) => {
     const response = await postApi('/v1/dailyexpense/add-expense', values);
     if (response.status === 200) {
         showToast(response.data.message, 'success');
@@ -38,7 +38,7 @@ const BalanceForm: React.FC<BalanceFormProps> = ({ onClose }) => {
 
   return (
     <Formik
-      initialValues={{ openingBalance: 0, closingBalance: 0 }}
+      initialValues={{ openingBalance: 0, closingBalance: 0, expenseType:'Balance' }}
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
